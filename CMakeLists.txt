@@ -3,4 +3,4 @@ project(RemoteBackup_Client)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(RemoteBackup_Client main.cpp)
+add_executable(RemoteBackup_Client main.cpp FileWatcher.cpp FileWatcher.h)
