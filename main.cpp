@@ -6,8 +6,12 @@ void fileWatcherTest();
 
 int main() {
     int selection;
-    std::cout << "Menu options:\n0 - fileWatcherTest" << std::endl;
-    std::cout << "\n Enter selection: ";
+    std::cout << "Menu options:" << std::endl;
+
+    // Add new options as needed
+    std::cout << "0 - fileWatcherTest" << std::endl;
+
+    std::cout << "Enter selection: ";
 
     // read the input
     std::cin>>selection;
@@ -23,8 +27,12 @@ int main() {
 }
 
 void fileWatcherTest () {
+    std::cout << "Enter path to watch: ";
+    std::string path_to_watch;
+    std::cin>>path_to_watch;
+
     // Create a FileWatcher instance that will check the current folder for changes every 5 seconds
-    FileWatcher fw{"./", std::chrono::milliseconds(5000)};
+    FileWatcher fw{path_to_watch, std::chrono::milliseconds(5000)};
 
     // Start monitoring a folder for changes and (in case of changes)
     // run a user provided lambda function
