@@ -3,4 +3,10 @@ project(RemoteBackup_Client)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(RemoteBackup_Client main.cpp FileWatcher.cpp FileWatcher.h)
+add_executable(RemoteBackup_Client main.cpp FileWatcher/FileWatcher.cpp FileWatcher/FileWatcher.h SocketConnection/SocketConnection.cpp SocketConnection/SocketConnection.h)
+
+# In order to include Boost libraries
+find_package(Boost)
+IF (Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIR})
+endif()

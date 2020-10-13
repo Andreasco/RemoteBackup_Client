@@ -1,8 +1,10 @@
 #include <iostream>
 
-#include "FileWatcher.h"
+#include "FileWatcher/FileWatcher.h"
+#include "SocketConnection/SocketConnection.h"
 
 void fileWatcherTest();
+void socketTest();
 
 int main() {
     int selection;
@@ -10,6 +12,7 @@ int main() {
 
     // Add new options as needed
     std::cout << "0 - fileWatcherTest" << std::endl;
+    std::cout << "1 - socketTest" << std::endl;
 
     std::cout << "Enter selection: ";
 
@@ -19,6 +22,10 @@ int main() {
         case 0:
             std::cout << "FileWatcher Test Initialized" << std::endl;
             fileWatcherTest();
+            break;
+        case 1:
+            std::cout << "Socket Test Initialized" << std::endl;
+            socketTest();
             break;
         default:
             std::cout << "Error!" << std::endl;
@@ -56,4 +63,9 @@ void fileWatcherTest () {
                 std::cout << "Error! Unknown file status.\n";
         }
     });
+}
+
+void socketTest(){
+    SocketConnection s;
+    s.prova();
 }
