@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "FileWatcher/FileWatcher.h"
-#include "SocketConnection/SocketConnection.h"
+#include "ConnectionAPI/Connection.cpp"
 
 void fileWatcherTest();
 void socketTest();
@@ -66,6 +66,15 @@ void fileWatcherTest () {
 }
 
 void socketTest(){
-    SocketConnection s;
-    s.prova();
+    Connection s("0.0.0.0", 5005);
+    std::cout << s.read(); //Leggo quello che mi arriva appena instauro la connessione
+    std::string message;
+    //std::cin >> message; //Dovrei leggere da tastiera ma se lo faccio legge solo fino al primo spazio
+    message = "login guido guido.poli";
+    s.send(message); //FIXME non manda il messaggio
+    std::cout << s.read() << std::endl;
+
+    //Per provare l'esempio funzionante
+    /*Connection s;
+    s.prova("0.0.0.0", 1234);*/
 }
