@@ -49,7 +49,7 @@ public:
         std::cout << "[+] SEND - " << message << std::endl;
         const std::string msg = message + "\n";
         boost::system::error_code error;
-        boost::asio::write( *socket, boost::asio::buffer(message), error);
+        boost::asio::write( *socket, boost::asio::buffer(msg), error);
         if(!error) {
             std::cout << "[+] Client sent: " << message << std::endl;
         }
