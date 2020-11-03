@@ -7,7 +7,6 @@ void fileWatcherTest();
 void socketTest();
 
 int main() {
-    int selection;
     std::cout << "Menu options:" << std::endl;
 
     // Add new options as needed
@@ -17,7 +16,9 @@ int main() {
     std::cout << "Enter selection: ";
 
     // read the input
-    std::cin>>selection;
+    std::string input;
+    std::getline(std::cin, input);
+    int selection = std::stoi(input);
     switch(selection){
         case 0:
             std::cout << "FileWatcher Test Initialized" << std::endl;
@@ -67,14 +68,13 @@ void fileWatcherTest () {
 
 void socketTest(){
     Connection s("0.0.0.0", 1234);
-    //std::cout << s.read(); //Leggo quello che mi arriva appena instauro la connessione
+    std::cout << s.read(); //Leggo quello che mi arriva appena instauro la connessione
     std::string message;
-    //std::cin >> message; //Dovrei leggere da tastiera ma se lo faccio legge solo fino al primo spazio
-    message = "login guido guido.poli";
-    s.send(message);
-    std::cout << s.read() << std::endl;
+    std::getline(std::cin, message);
+    //s.send(message);
+    //std::cout << s.read() << std::endl;
 
-    //Per provare l'esempio funzionante
+    //Per usare il metodo prova col server di prova
     /*Connection s;
     s.prova("0.0.0.0", 1234);*/
 }
