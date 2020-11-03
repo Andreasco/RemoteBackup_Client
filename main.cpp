@@ -76,6 +76,7 @@ void socketTest(){
         std::cout << s.read();
     }
 
+    //prova 2
     //Per usare il metodo prova col server di prova
     /*Connection s;
     s.prova("0.0.0.0", 1234);*/
