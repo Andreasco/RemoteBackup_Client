@@ -67,12 +67,14 @@ void fileWatcherTest () {
 }
 
 void socketTest(){
-    Connection s("0.0.0.0", 1234);
+    Connection s("0.0.0.0", 5007);
     std::cout << s.read(); //Leggo quello che mi arriva appena instauro la connessione
     std::string message;
-    std::getline(std::cin, message);
-    //s.send(message);
-    //std::cout << s.read() << std::endl;
+    while(message != "stop") {
+        std::getline(std::cin, message);
+        s.send(message);
+        std::cout << s.read();
+    }
 
     //Per usare il metodo prova col server di prova
     /*Connection s;

@@ -19,8 +19,10 @@ public:
         try {
             socket = new tcp::socket(io_context); //Prova per cercare di inizializzare il socket DOPO io_context
             socket->connect( tcp::endpoint( boost::asio::ip::address::from_string(ip_address), port_number ));
-            //Altrimenti cancellare la prima riga del try, togliere l'asterisco alla riga 14 e aggiungere socket(io_context)
-            //alla riga 18 dopo io_context()
+            /*
+             * Altrimenti cancellare la prima riga del try, togliere l'asterisco alla riga 14 e
+             * aggiungere socket(io_context) alla riga 18 dopo io_context()
+             */
         }
         catch (std::exception& e)
         {
