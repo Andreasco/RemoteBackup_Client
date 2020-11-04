@@ -6,6 +6,8 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 
+static bool DEBUG = true;
+
 using boost::asio::ip::tcp;
 
 class Connection {
@@ -26,7 +28,9 @@ public:
         }
         catch (std::exception& e)
         {
-            std::cerr << "Entered in the catch" << std::endl;
+            if(DEBUG) {
+                std::cerr << "Entered in the catch" << std::endl;
+            }
             std::cerr << e.what() << std::endl;
             throw e;
         }
@@ -37,12 +41,16 @@ public:
         boost::asio::streambuf buf;
         boost::asio::read_until( *socket, buf, "\n", error);
         if(!error){
-            std::cout << "[+] Receive succeded " << std::endl;
+            if(DEBUG) {
+                std::cout << "[+] Receive succeded " << std::endl;
+            }
             std::string data = boost::asio::buffer_cast<const char*>(buf.data());
             return data;
         }
         else{
-            std::cout << "[-] Receive failed: " << error.message() << std::endl;
+            if(DEBUG) {
+                std::cerr << "[-] Receive failed: " << error.message() << std::endl;
+            }
         }
         return nullptr;
     }
@@ -53,10 +61,14 @@ public:
         boost::system::error_code error;
         boost::asio::write( *socket, boost::asio::buffer(msg), error);
         if(!error) {
-            std::cout << "[+] Client sent: " << message << std::endl;
+            if(DEBUG) {
+                std::cout << "[+] Client sent: " << message << std::endl;
+            }
         }
         else {
-            std::cout << "[-] Send failed: " << error.message() << std::endl;
+            if(DEBUG) {
+                std::cerr << "[-] Send failed: " << error.message() << std::endl;
+            }
         }
     }
 

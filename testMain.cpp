@@ -3,37 +3,6 @@
 #include "FileWatcher/FileWatcher.h"
 #include "ConnectionAPI/Connection.cpp"
 
-void fileWatcherTest();
-void socketTest();
-
-int main() {
-    std::cout << "Menu options:" << std::endl;
-
-    // Add new options as needed
-    std::cout << "0 - fileWatcherTest" << std::endl;
-    std::cout << "1 - socketTest" << std::endl;
-
-    std::cout << "Enter selection: ";
-
-    // read the input
-    std::string input;
-    std::getline(std::cin, input);
-    int selection = std::stoi(input);
-    switch(selection){
-        case 0:
-            std::cout << "FileWatcher Test Initialized" << std::endl;
-            fileWatcherTest();
-            break;
-        case 1:
-            std::cout << "Socket Test Initialized" << std::endl;
-            socketTest();
-            break;
-        default:
-            std::cout << "Error!" << std::endl;
-    }
-    return 0;
-}
-
 void fileWatcherTest () {
     std::cout << "Enter path to watch: ";
     std::string path_to_watch;
@@ -79,4 +48,32 @@ void socketTest(){
     //Per usare il metodo prova col server di prova
     /*Connection s;
     s.prova("0.0.0.0", 1234);*/
+}
+
+int main() {
+    std::cout << "Menu options:" << std::endl;
+
+    // Add new options as needed
+    std::cout << "0 - fileWatcherTest" << std::endl;
+    std::cout << "1 - socketTest" << std::endl;
+
+    std::cout << "Enter selection: ";
+
+    // read the input
+    std::string input;
+    std::getline(std::cin, input);
+    int selection = std::stoi(input);
+    switch(selection){
+        case 0:
+            std::cout << "FileWatcher Test Initialized" << std::endl;
+            fileWatcherTest();
+            break;
+        case 1:
+            std::cout << "Socket Test Initialized" << std::endl;
+            socketTest();
+            break;
+        default:
+            std::cout << "Error!" << std::endl;
+    }
+    return 0;
 }
