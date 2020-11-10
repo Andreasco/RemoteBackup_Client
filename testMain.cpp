@@ -37,17 +37,34 @@ void fileWatcherTest () {
 
 void socketTest(){
     Connection s("0.0.0.0", 5007);
-    std::cout << s.read(); //Leggo quello che mi arriva appena instauro la connessione
+    std::cout << s.read_string(); //Leggo quello che mi arriva appena instauro la connessione
     std::string message;
     while(message != "stop") {
         std::getline(std::cin, message);
-        s.send(message);
-        std::cout << s.read();
+        s.send_string(message);
+        std::cout << s.read_string();
     }
 
     //Per usare il metodo prova col server di prova
     /*Connection s;
     s.prova("0.0.0.0", 1234);*/
+}
+
+void sendFileTest(){
+    Connection s("0.0.0.0", 1234);
+    std::string input;
+    while (input != "y" && input != "n") {
+        std::cout << "Do you want to send the file now?(y/n): ";
+        std::getline(std::cin, input);
+        if (input == "y") {
+            s.send_file("/Users/andreascopp/Desktop/prova.txt");
+        }
+        if (input == "n"){
+            std::cout << "Ok bye!" << std::endl;
+        }
+        else
+            std::cout << "Enter a valid selection!" << std::endl;
+    }
 }
 
 int main() {
@@ -56,6 +73,7 @@ int main() {
     // Add new options as needed
     std::cout << "0 - fileWatcherTest" << std::endl;
     std::cout << "1 - socketTest" << std::endl;
+    std::cout << "2 - sendFileTest" << std::endl;
 
     std::cout << "Enter selection: ";
 
@@ -71,6 +89,10 @@ int main() {
         case 1:
             std::cout << "Socket Test Initialized" << std::endl;
             socketTest();
+            break;
+        case 2:
+            std::cout << "Send File Test Initialized" << std::endl;
+            sendFileTest();
             break;
         default:
             std::cout << "Error!" << std::endl;

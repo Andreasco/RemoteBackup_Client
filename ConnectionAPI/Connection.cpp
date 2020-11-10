@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 
@@ -36,7 +37,7 @@ public:
         }
     }
 
-    std::string read(){
+    std::string read_string(){
         boost::system::error_code error;
         boost::asio::streambuf buf;
         boost::asio::read_until( *socket, buf, "\n", error);
@@ -55,7 +56,7 @@ public:
         return nullptr;
     }
 
-    void send(std::string const& message){
+    void send_string(std::string const& message){
         std::cout << "[+] SEND - " << message << std::endl;
         const std::string msg = message + "\n";
         boost::system::error_code error;
@@ -70,6 +71,49 @@ public:
                 std::cerr << "[-] Send failed: " << error.message() << std::endl;
             }
         }
+    }
+
+    //TODO RIFINIRE
+    void send_file(std::string const& path_file){
+        boost::array<char, 1024> buf;
+        boost::system::error_code error;
+        std::ifstream source_file(path_file, std::ios_base::binary | std::ios_base::ate);
+
+        if (!source_file){
+            if(DEBUG) {
+                std::cout << "[-] Failed to open " << path_file << std::endl;
+            }
+            //return __LINE__;
+        }
+        size_t file_size = source_file.tellg();
+        source_file.seekg(0);
+        // first send file name and file size to server
+        boost::asio::streambuf request;
+        std::ostream request_stream(&request);
+        request_stream << path_file << "\n"
+                       << file_size << "\n\n";
+        boost::asio::write(*socket, request);
+        if(DEBUG) {
+            std::cout << "[+] Start sending file content" << std::endl;
+        }
+        for (;;){
+            if (source_file.eof()==false){
+                source_file.read(buf.c_array(), (std::streamsize)buf.size());
+                if (source_file.gcount()<=0){
+                    std::cout << "[!] Read file error" << std::endl;
+                    //return __LINE__;
+                }
+                boost::asio::write(*socket, boost::asio::buffer(buf.c_array(), source_file.gcount()),
+                                   boost::asio::transfer_all(), error);
+                if (error){
+                    std::cout << "[!] Send error:" << error << std::endl;
+                    //return __LINE__;
+                }
+            }
+            else
+                break;
+        }
+        std::cout << "[+] File " << path_file << " sent successfully!" << std::endl;
     }
 
     /*void prova(std::string ip_address, int port_number) {
