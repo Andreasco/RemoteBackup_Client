@@ -37,8 +37,8 @@ public:
     }
 
     static void print_percentage(float percent){
-        double hashes = percent / 5;
-        double spaces = std::ceil(100.0 / 5 - percent / 5);
+        float hashes = percent / 5;
+        float spaces = std::ceil(100.0 / 5 - percent / 5);
         std::cout << "\r" << "[" << std::string(hashes, '#') << std::string(spaces, ' ') << "]";
         std::cout << " " << percent << "%";
         std::cout.flush();
@@ -114,6 +114,8 @@ public:
         std::ostream request_stream(&request);
         request_stream << file_path << "\n"
                        << file_size << "\n\n"; // Consider sending readable version, does it change anything?
+
+        // Send the request
         boost::asio::write(*socket, request, error);
         if(error){
             std::cout << "[!] Send request error:" << error << std::endl;
@@ -131,7 +133,7 @@ public:
         while(!source_file.eof()) {
             source_file.read(buf.c_array(), (std::streamsize)buf.size());
 
-            int bytes_read_from_file = source_file.gcount(); //int va bene perchè leggo al massimo la dimensione di buf, in questo caso 1024
+            int bytes_read_from_file = source_file.gcount(); //int is fine because i read at most buf's size, 1024 in this case
 
             // If uncommented the progress is printed in multiple lines succeded from this line
             // Only use to debug file reading otherwise the progress get unreadable
