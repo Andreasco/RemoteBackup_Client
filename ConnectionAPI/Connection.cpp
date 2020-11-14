@@ -36,6 +36,25 @@ public:
         }
     }
 
+    static void print_percentage(float percent){
+        double hashes = percent / 5;
+        double spaces = std::ceil(100.0 / 5 - percent / 5);
+        std::cout << "\r" << "[" << std::string(hashes, '#') << std::string(spaces, ' ') << "]";
+        std::cout << " " << percent << "%";
+        std::cout.flush();
+    }
+
+    static std::string file_size_to_readable(int file_size){
+        std::string measures[] = {"bytes", "KB", "MB", "GB", "TB"};
+        int i = 0;
+        int new_file_size = file_size;
+        while (new_file_size > 1024){ //NB su Mac è 1000, usa le potenze di 10
+            new_file_size = new_file_size / 1024;
+            i++;
+        }
+        return std::to_string(new_file_size) + " " + measures[i];
+    }
+
     std::string read_string() {
         boost::system::error_code error;
         boost::asio::streambuf buf;
@@ -72,9 +91,11 @@ public:
         }
     }
 
-    //TODO Rifinire e rendere asincrono
+    //TODO Rendere asincrono
     void send_file(std::string const& file_path) {
-        boost::array<char, 1024> buf;
+        // !!!!NOTA BENE la dimensione di questo buffer determina l'MTU, cioè quanti byte alla volta vengono copiati
+        // dal file sorgente a tale buffer e quindi quanti byte vengono spediti ogni volta
+        boost::array<char, 1024> buf{};
         boost::system::error_code error;
         std::ifstream source_file(file_path, std::ios_base::binary | std::ios_base::ate);
 
@@ -86,39 +107,58 @@ public:
         size_t file_size = source_file.tellg();
         source_file.seekg(0);
 
-        // First send file name and file size to server
+        std::string file_size_readable = file_size_to_readable(file_size);
+
+        // First send file name and file size in bytes to server
         boost::asio::streambuf request;
         std::ostream request_stream(&request);
         request_stream << file_path << "\n"
-                       << file_size << "\n\n";
+                       << file_size << "\n\n"; // Considerare di mandare la versione leggibile della dimensione, cambia qualcosa?
         boost::asio::write(*socket, request, error);
         if(error){
             std::cout << "[!] Send request error:" << error << std::endl;
             //TODO lanciare un'eccezione? Qua dovrò controllare se il server funziona o no
         }
         if(DEBUG) {
-            std::cout << "[+] " << file_path << " size is: " << file_size << std::endl;
+            std::cout << "[+] " << file_path << " size is: " << file_size_readable << std::endl;
             std::cout << "[+] Start sending file content" << std::endl;
         }
-        for(;;) {
-            if(source_file.eof()==false) {
-                source_file.read(buf.c_array(), (std::streamsize)buf.size());
-                if(source_file.gcount()<=0) {
-                    std::cout << "[!] Read file error" << std::endl;
-                    break;
-                    //TODO gestire questo errore
-                }
-                boost::asio::write(*socket, boost::asio::buffer(buf.c_array(), source_file.gcount()),
-                                   boost::asio::transfer_all(), error);
-                if(error) {
-                    std::cout << "[!] Send file error:" << error << std::endl;
-                    //TODO lanciare un'eccezione?
-                }
-            }
-            else
+
+        long bytes_sent = 0;
+        float percent = 0;
+        print_percentage(percent);
+
+        while(!source_file.eof()) {
+            source_file.read(buf.c_array(), (std::streamsize)buf.size());
+
+            int bytes_read_from_file = source_file.gcount(); //int va bene perchè leggo al massimo la dimensione di buf, in questo caso 1024
+
+            // Se la attivo la stampa del progesso avviene su più linee succedute da questa linea
+            // Usare solo in caso di debug sulla lettura del file altrimenti il progresso diventa illegibile
+            /*if(DEBUG){
+                std::cout << "[+] Bytes read from file: " << bytes_read_from_file << std::endl;
+            }*/
+
+            if(bytes_read_from_file<=0) {
+                std::cout << "[!] Read file error" << std::endl;
                 break;
+                //TODO gestire questo errore
+            }
+
+            percent = std::ceil((100.0 * bytes_sent) / file_size);
+            print_percentage(percent);
+
+            boost::asio::write(*socket, boost::asio::buffer(buf.c_array(), source_file.gcount()),
+                               boost::asio::transfer_all(), error);
+            if(error) {
+                std::cout << "[!] Send file error:" << error << std::endl;
+                //TODO lanciare un'eccezione?
+            }
+
+            bytes_sent += bytes_read_from_file;
         }
-        std::cout << "[+] File " << file_path << " sent successfully!" << std::endl;
+
+        std::cout << "\n" << "[+] File " << file_path << " sent successfully!" << std::endl;
     }
 
     //TODO Rifinire e rendere asincrono

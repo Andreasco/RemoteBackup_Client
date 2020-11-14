@@ -57,7 +57,7 @@ void sendFileTest(){
         std::cout << "Do you want to send the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
-            s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
+            s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
