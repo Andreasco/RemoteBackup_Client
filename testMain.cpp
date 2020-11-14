@@ -84,7 +84,7 @@ int main() {
 
     std::cout << "Enter selection: ";
 
-    // read the input
+    // Read the input
     std::string input;
     std::getline(std::cin, input);
     int selection = std::stoi(input);

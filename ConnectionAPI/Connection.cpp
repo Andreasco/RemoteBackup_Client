@@ -23,8 +23,8 @@ public:
             socket = std::make_unique<tcp::socket>(io_context); //Prova per cercare di inizializzare il socket DOPO io_context
             socket->connect(tcp::endpoint(boost::asio::ip::address::from_string(ip_address), port_number));
             /*
-             * Altrimenti cancellare la prima riga del try, togliere l'asterisco alla riga 14 e
-             * aggiungere socket(io_context) alla riga 18 dopo io_context()
+             * Otherwise delete line 23, delete unique pointer at line 17 and
+             * add socket(io_context) at line 18 after io_context()
              */
         }
         catch(std::exception& e) {
@@ -48,7 +48,7 @@ public:
         std::string measures[] = {"bytes", "KB", "MB", "GB", "TB"};
         int i = 0;
         int new_file_size = file_size;
-        while (new_file_size > 1024){ //NB su Mac è 1000, usa le potenze di 10
+        while (new_file_size > 1024){ //NOTE on Mac is 1000, it uses powers of 10
             new_file_size = new_file_size / 1024;
             i++;
         }
@@ -93,8 +93,8 @@ public:
 
     //TODO Rendere asincrono
     void send_file(std::string const& file_path) {
-        // !!!!NOTA BENE la dimensione di questo buffer determina l'MTU, cioè quanti byte alla volta vengono copiati
-        // dal file sorgente a tale buffer e quindi quanti byte vengono spediti ogni volta
+        // !!!WATCH OUT this buffer's size determines the MTU, therefore how many byte at time get copied
+        // from source file to such buffer which means how many bytes get sent everytime
         boost::array<char, 1024> buf{};
         boost::system::error_code error;
         std::ifstream source_file(file_path, std::ios_base::binary | std::ios_base::ate);
@@ -113,7 +113,7 @@ public:
         boost::asio::streambuf request;
         std::ostream request_stream(&request);
         request_stream << file_path << "\n"
-                       << file_size << "\n\n"; // Considerare di mandare la versione leggibile della dimensione, cambia qualcosa?
+                       << file_size << "\n\n"; // Consider sending readable version, does it change anything?
         boost::asio::write(*socket, request, error);
         if(error){
             std::cout << "[!] Send request error:" << error << std::endl;
@@ -133,8 +133,8 @@ public:
 
             int bytes_read_from_file = source_file.gcount(); //int va bene perchè leggo al massimo la dimensione di buf, in questo caso 1024
 
-            // Se la attivo la stampa del progesso avviene su più linee succedute da questa linea
-            // Usare solo in caso di debug sulla lettura del file altrimenti il progresso diventa illegibile
+            // If uncommented the progress is printed in multiple lines succeded from this line
+            // Only use to debug file reading otherwise the progress get unreadable
             /*if(DEBUG){
                 std::cout << "[+] Bytes read from file: " << bytes_read_from_file << std::endl;
             }*/
