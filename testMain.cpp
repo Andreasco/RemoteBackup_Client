@@ -57,14 +57,20 @@ void sendFileTest(){
         std::cout << "Do you want to send the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
-            s.send_file("/Users/andreascopp/Desktop/prova.txt");
+            s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
         }
-        if (input == "n"){
+        else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
         }
         else
             std::cout << "Enter a valid selection!" << std::endl;
     }
+}
+
+void readFileTest(){
+    Connection s("0.0.0.0", 1234);
+    std::string input;
+    s.read_file();
 }
 
 int main() {
@@ -74,6 +80,7 @@ int main() {
     std::cout << "0 - fileWatcherTest" << std::endl;
     std::cout << "1 - socketTest" << std::endl;
     std::cout << "2 - sendFileTest" << std::endl;
+    std::cout << "3 - readFileTest" << std::endl;
 
     std::cout << "Enter selection: ";
 
@@ -93,6 +100,10 @@ int main() {
         case 2:
             std::cout << "Send File Test Initialized" << std::endl;
             sendFileTest();
+            break;
+        case 3:
+            std::cout << "Read File Test Initialized" << std::endl;
+            readFileTest();
             break;
         default:
             std::cout << "Error!" << std::endl;
