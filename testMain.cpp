@@ -13,7 +13,7 @@ void fileWatcherTest () {
 
     // Start monitoring a folder for changes and (in case of changes)
     // run a user provided lambda function
-    fw.start([] (std::string path_to_watch, FileStatus status) -> void {
+    fw.start([] (const std::string& path_to_watch, FileStatus status) -> void {
         // Process only regular files, all other file types are ignored
         if(!std::filesystem::is_regular_file(std::filesystem::path(path_to_watch)) && status != FileStatus::erased) {
             return;
