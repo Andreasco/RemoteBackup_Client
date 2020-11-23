@@ -2,6 +2,7 @@
 
 #include "FileWatcher/FileWatcher.h"
 #include "ConnectionAPI/Connection.cpp"
+#include "ChecksumAPI/SHA256.h"
 
 void fileWatcherTest () {
     std::cout << "Enter path to watch: ";
@@ -36,7 +37,7 @@ void fileWatcherTest () {
 }
 
 void socketTest(){
-    Connection s("0.0.0.0", 5007);
+    Connection s("0.0.0.0", 5007, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::cout << s.read_string(); //Leggo quello che mi arriva appena instauro la connessione
     std::string message;
     while(message != "stop") {
@@ -51,7 +52,7 @@ void socketTest(){
 }
 
 void sendFileTest(){
-    Connection s("0.0.0.0", 1234);
+    Connection s("0.0.0.0", 5002, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::string input;
     while (input != "y" && input != "n") {
         std::cout << "Do you want to send the file now?(y/n): ";
@@ -67,10 +68,22 @@ void sendFileTest(){
     }
 }
 
+void sendFile2(){
+    Connection s("0.0.0.0", 5002, "/Users/andreascopp/Desktop/Client-TestFiles/");
+    s.send_string("login guido guido.poli");
+    s.read_string();
+    s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
+}
+
 void readFileTest(){
-    Connection s("0.0.0.0", 1234);
+    Connection s("0.0.0.0", 1234, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::string input;
     s.read_file();
+}
+
+void checksum(){
+    std::string checksum = sha256("prova");
+    std::cout << "Checksum: " << checksum << std::endl; //FIXME è diverso da quello di openSSL
 }
 
 int main() {
@@ -81,6 +94,8 @@ int main() {
     std::cout << "1 - socketTest" << std::endl;
     std::cout << "2 - sendFileTest" << std::endl;
     std::cout << "3 - readFileTest" << std::endl;
+    std::cout << "4 - checksumTest" << std::endl;
+    std::cout << "5 - sendFile2" << std::endl;
 
     std::cout << "Enter selection: ";
 
@@ -104,6 +119,14 @@ int main() {
         case 3:
             std::cout << "Read File Test Initialized" << std::endl;
             readFileTest();
+            break;
+        case 4:
+            std::cout << "Checksum Test Initialized" << std::endl;
+            checksum();
+            break;
+        case 5:
+            std::cout << "Send File 2 Test Initialized" << std::endl;
+            sendFile2();
             break;
         default:
             std::cout << "Error!" << std::endl;
