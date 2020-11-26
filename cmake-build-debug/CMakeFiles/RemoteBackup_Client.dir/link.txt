@@ -1,0 +1,1 @@
+/usr/bin/c++  -pthread -g   CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o  -o RemoteBackup_Client 

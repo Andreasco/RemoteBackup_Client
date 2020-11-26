@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "FileWatcher/FileWatcher.h"
-#include "ConnectionAPI/Connection.cpp"
 #include "ChecksumAPI/SHA256.h"
 
 void fileWatcherTest () {
@@ -9,26 +8,32 @@ void fileWatcherTest () {
     std::string path_to_watch;
     std::cin>>path_to_watch;
 
+    // Create a Connection
+    Connection conn_("0.0.0.0", 5007, path_to_watch);
+    conn_.send_string("login guido guido.poli");
+    conn_.read_string();
+
     // Create a FileWatcher instance that will check the current folder for changes every 5 seconds
-    FileWatcher fw{path_to_watch, std::chrono::milliseconds(5000)};
+    FileWatcher fw{path_to_watch, std::chrono::milliseconds(5000), conn_};
 
     // Start monitoring a folder for changes and (in case of changes)
     // run a user provided lambda function
-    fw.start([] (const std::string& path_to_watch, FileStatus status) -> void {
+    fw.start([] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
         // Process only regular files, all other file types are ignored
-        if(!std::filesystem::is_regular_file(std::filesystem::path(path_to_watch)) && status != FileStatus::erased) {
+        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path))) {
             return;
         }
 
         switch(status) {
             case FileStatus::created:
-                std::cout << "File created: " << path_to_watch << '\n';
+                conn_.send_file(file_path);
+                std::cout << "File created: " << file_path << '\n';
                 break;
             case FileStatus::modified:
-                std::cout << "File modified: " << path_to_watch << '\n';
+                std::cout << "File modified: " << file_path << '\n';
                 break;
             case FileStatus::erased:
-                std::cout << "File erased: " << path_to_watch << '\n';
+                std::cout << "File erased: " << file_path << '\n';
                 break;
             default:
                 std::cout << "Error! Unknown file status.\n";

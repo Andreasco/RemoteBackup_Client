@@ -13,6 +13,7 @@
 #include <map>
 #include <string>
 #include <functional>
+#include "../ConnectionAPI/Connection.cpp"
 
 // Define available file changes
 enum class FileStatus {created, modified, erased};
@@ -26,7 +27,7 @@ public:
     std::chrono::duration<int, std::milli> delay;
 
     // Keep a record of files from the base directory and their last modification time
-    FileWatcher(std::string path_to_watch, std::chrono::duration<int, std::milli> delay) : path_to_watch{path_to_watch}, delay{delay} {
+    FileWatcher(std::string path_to_watch, std::chrono::duration<int, std::milli> delay, Connection& conn_) : path_to_watch{path_to_watch}, delay{delay}, conn_(conn_) {
         //std::cout << "Test file/folder order in Filewatcher constructor" << std::endl;
         for(auto &file : std::filesystem::recursive_directory_iterator(path_to_watch)) {
             //std::cout << "File - " << file.path().string() << std::endl;
@@ -36,7 +37,7 @@ public:
         //std::cout << "End test on Filewatcher constructor" << std::endl;
     }
 
-    void start(const std::function<void (std::string, FileStatus)> &action);
+    void start(const std::function<void (std::string, Connection&, FileStatus)> &action);
     void initial_check(std::map<std::string, std::filesystem::file_time_type> &server, bool server_to_client, const std::function<void (std::string, FileStatus)> &action);
 
     //for tests
@@ -45,7 +46,8 @@ public:
     }
 
 private:
-    std::map<std::string, std::filesystem::file_time_type> paths_;
+    Connection &conn_;
+ std::map<std::string, std::filesystem::file_time_type> paths_;
     bool running_ = true;
 
     // Check if "paths_" contains a given key

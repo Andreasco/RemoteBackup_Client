@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/cbrugo/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp
+iostream
+-
+boost/asio.hpp
+-
+boost/array.hpp
+-
+
+/home/cbrugo/CLionProjects/RemoteBackup_Client/FileWatcher/FileWatcher.cpp
+FileWatcher.h
+/home/cbrugo/CLionProjects/RemoteBackup_Client/FileWatcher/FileWatcher.h
+
+/home/cbrugo/CLionProjects/RemoteBackup_Client/FileWatcher/FileWatcher.h
+iostream
+-
+filesystem
+-
+chrono
+-
+thread
+-
+unordered_map
+-
+map
+-
+string
+-
+functional
+-
+
+/home/cbrugo/CLionProjects/RemoteBackup_Client/main.cpp
+iostream
+-
+FileWatcher/FileWatcher.h
+/home/cbrugo/CLionProjects/RemoteBackup_Client/FileWatcher/FileWatcher.h
+ConnectionAPI/Connection.cpp
+/home/cbrugo/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp
+

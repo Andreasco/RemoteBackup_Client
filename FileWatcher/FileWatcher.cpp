@@ -6,7 +6,7 @@
 
 
 // Monitor "path_to_watch" for changes and in case of a change execute the user supplied "action" function
-void FileWatcher::start(const std::function<void (std::string, FileStatus)> &action) {
+void FileWatcher::start(const std::function<void (std::string, Connection&, FileStatus)> &action) {
     while(running_) {
         // Wait for "delay" milliseconds
         std::this_thread::sleep_for(delay);
@@ -18,7 +18,7 @@ void FileWatcher::start(const std::function<void (std::string, FileStatus)> &act
         while (it != paths_.end()) {
             std::cout << "File check - " << it->first << std::endl;
             if (!std::filesystem::exists(complete_path(it->first))) {
-                action(complete_path(it->first), FileStatus::erased);
+                action(complete_path(it->first), conn_, FileStatus::erased);
                 it = paths_.erase(it);
             } else {
                 it++;
@@ -35,13 +35,13 @@ void FileWatcher::start(const std::function<void (std::string, FileStatus)> &act
             if(!contains(relative(file.path().string()))) {
                 //std::cout << "new" <<std::endl;
                 paths_[relative(file.path().string())] = current_file_last_write_time;
-                action(file.path().string(), FileStatus::created);
+                action(file.path().string(), conn_, FileStatus::created);
                 // File modification
             } else {
                 //std::cout << "not new" <<std::endl;
                 if(paths_[relative(file.path().string())] != current_file_last_write_time) {
                     paths_[relative(file.path().string())] = current_file_last_write_time;
-                    action(file.path().string(), FileStatus::modified);
+                    action(file.path().string(), conn_, FileStatus::modified);
                 }
             }
         }
