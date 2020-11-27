@@ -52,13 +52,14 @@ void socketTest(){
 }
 
 void sendFileTest(){
-    Connection s("0.0.0.0", 5002, "/Users/andreascopp/Desktop/Client-TestFiles/");
+    std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
+    Connection s("0.0.0.0", 1234, base_path_);
     std::string input;
     while (input != "y" && input != "n") {
         std::cout << "Do you want to send the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
-            s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
+            s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
@@ -68,11 +69,24 @@ void sendFileTest(){
     }
 }
 
-void sendFile2(){
-    Connection s("0.0.0.0", 5002, "/Users/andreascopp/Desktop/Client-TestFiles/");
+void addFileTest(std::string path){
+    std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
+    Connection s("0.0.0.0", 5004, base_path_);
     s.send_string("login guido guido.poli");
-    s.read_string();
-    s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
+    std::string input;
+    while (input != "y" && input != "n") {
+        std::cout << "Do you want to send the file now?(y/n): ";
+        std::getline(std::cin, input);
+        if (input == "y") {
+            s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
+            std::this_thread::sleep_for(std::chrono::seconds(3));
+        }
+        else if (input == "n"){
+            std::cout << "Ok bye!" << std::endl;
+        }
+        else
+            std::cout << "Enter a valid selection!" << std::endl;
+    }
 }
 
 void readFileTest(){
@@ -95,7 +109,7 @@ int main() {
     std::cout << "2 - sendFileTest" << std::endl;
     std::cout << "3 - readFileTest" << std::endl;
     std::cout << "4 - checksumTest" << std::endl;
-    std::cout << "5 - sendFile2" << std::endl;
+    std::cout << "5 - addFileTest" << std::endl;
 
     std::cout << "Enter selection: ";
 
@@ -125,8 +139,9 @@ int main() {
             checksum();
             break;
         case 5:
-            std::cout << "Send File 2 Test Initialized" << std::endl;
-            sendFile2();
+            std::cout << "Add File Test Initialized" << std::endl;
+            addFileTest("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
+            addFileTest("/Users/andreascopp/Desktop/Client-TestFiles/invio_client2.txt");
             break;
         default:
             std::cout << "Error!" << std::endl;

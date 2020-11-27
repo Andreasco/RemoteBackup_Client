@@ -7,7 +7,15 @@ add_executable(RemoteBackup_Client testMain.cpp FileWatcher/FileWatcher.cpp
         FileWatcher/FileWatcher.h ConnectionAPI/Connection.cpp ChecksumAPI/SHA256.cpp ChecksumAPI/SHA256.h)
 
 # In order to include Boost libraries
-find_package(Boost)
-IF (Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIR})
-endif()
+#find_package(Boost)
+#IF (Boost_FOUND)
+#    include_directories(${Boost_INCLUDE_DIR})
+#endif()
+
+set(Boost_INCLUDE_DIR /usr/local/opt/boost-1.73.0/include)
+set(Boost_LIBRARY_DIR /usr/local/opt/boost-1.73.0/lib)
+find_package(Boost COMPONENTS serialization filesystem REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIR})
+
+target_link_libraries(RemoteBackup_Client ${Boost_LIBRARIES})

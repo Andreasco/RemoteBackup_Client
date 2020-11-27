@@ -77,7 +77,9 @@ public:
     }
 
     void send_string(std::string const& message) {
-        std::cout << "[INFO] SEND - " << message << std::endl;
+        if(DEBUG) {
+            std::cout << "[DEBUG] Sending string: " << message << std::endl;
+        }
         const std::string msg = message + "\n";
         boost::system::error_code error;
         boost::asio::write(*socket_, boost::asio::buffer(msg), error);
@@ -91,13 +93,31 @@ public:
         }
     }
 
-    /*void send_file(const std::string& file_path){
+    void add_file(const std::string& file_path){
         boost::asio::post(pool_, [this, file_path] {
+            std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
+
+            if(DEBUG)
+                std::cout << "[DEBUG] Cleaned file path: " << cleaned_file_path << std::endl;
+
+            // Forse da cambiare nel caso non serva al Server
+            std::ifstream source_file(file_path, std::ios_base::binary | std::ios_base::ate);
+            size_t file_size = source_file.tellg();
+            source_file.close();
+
+            std::ostringstream oss;
+            oss << "addFile ";
+            oss << cleaned_file_path;
+            oss << " ";
+            oss << file_size;
+            oss << "\n";
+            send_string(oss.str());
+
             handle_send_file(file_path);
         });
-    }*/
+    }
 
-    void send_file(std::string const& file_path) {
+    void handle_send_file(std::string const& file_path) {
         // !!!WATCH OUT this buffer's size determines the MTU, therefore how many byte at time get copied
         // from source file to such buffer, which means how many bytes get sent everytime
         boost::array<char, 1024> buf{};
@@ -126,18 +146,7 @@ public:
             //TODO lanciare un'eccezione? Qua dovrò controllare se il server funziona o no
         }*/
 
-        std::string cleaned_file_path = file_path.substr(base_path_.length()+1, file_path.length());
-
-        std::ostringstream oss;
-        oss << "addFile ";
-        oss << cleaned_file_path;
-        oss << " ";
-        oss << file_size;
-        oss << "\n";
-        boost::asio::write(*socket_, boost::asio::buffer(oss.str()), error);
-
         if(DEBUG) {
-            std::cout << "[DEBUG] " << "Cleaned file path: " << cleaned_file_path << std::endl;
             std::cout << "[DEBUG] " << file_path << " size is: " << file_size_readable << std::endl;
             std::cout << "[DEBUG] Start sending file content" << std::endl;
         }
