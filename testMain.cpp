@@ -36,7 +36,7 @@ void fileWatcherTest () {
     });
 }
 
-void socketTest(){
+void sendStringTest(){
     Connection s("0.0.0.0", 5007, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::cout << s.read_string(); //Leggo quello che mi arriva appena instauro la connessione
     std::string message;
@@ -51,35 +51,23 @@ void socketTest(){
     s.prova("0.0.0.0", 1234);*/
 }
 
-void sendFileTest(){
-    std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
-    Connection s("0.0.0.0", 1234, base_path_);
-    std::string input;
-    while (input != "y" && input != "n") {
-        std::cout << "Do you want to send the file now?(y/n): ";
-        std::getline(std::cin, input);
-        if (input == "y") {
-            s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
-        }
-        else if (input == "n"){
-            std::cout << "Ok bye!" << std::endl;
-        }
-        else
-            std::cout << "Enter a valid selection!" << std::endl;
-    }
-}
-
-void addFileTest(std::string path){
+void addFileTest(){
     std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
     Connection s("0.0.0.0", 5004, base_path_);
+
     s.send_string("login guido guido.poli");
+
     std::string input;
     while (input != "y" && input != "n") {
         std::cout << "Do you want to send the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
             s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
-            std::this_thread::sleep_for(std::chrono::seconds(3));
+            s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client2.txt");
+
+            // In order to wait the sending of the files, since they are made by different threads
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            s.send_string("close");
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
@@ -105,11 +93,10 @@ int main() {
 
     // Add new options as needed
     std::cout << "0 - fileWatcherTest" << std::endl;
-    std::cout << "1 - socketTest" << std::endl;
-    std::cout << "2 - sendFileTest" << std::endl;
-    std::cout << "3 - readFileTest" << std::endl;
-    std::cout << "4 - checksumTest" << std::endl;
-    std::cout << "5 - addFileTest" << std::endl;
+    std::cout << "1 - sendStringTest" << std::endl;
+    std::cout << "2 - readFileTest" << std::endl;
+    std::cout << "3 - checksumTest" << std::endl;
+    std::cout << "4 - addFileTest" << std::endl;
 
     std::cout << "Enter selection: ";
 
@@ -123,25 +110,20 @@ int main() {
             fileWatcherTest();
             break;
         case 1:
-            std::cout << "Socket Test Initialized" << std::endl;
-            socketTest();
+            std::cout << "Send String Test Initialized" << std::endl;
+            sendStringTest();
             break;
         case 2:
-            std::cout << "Send File Test Initialized" << std::endl;
-            sendFileTest();
-            break;
-        case 3:
             std::cout << "Read File Test Initialized" << std::endl;
             readFileTest();
             break;
-        case 4:
+        case 3:
             std::cout << "Checksum Test Initialized" << std::endl;
             checksum();
             break;
-        case 5:
+        case 4:
             std::cout << "Add File Test Initialized" << std::endl;
-            addFileTest("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
-            addFileTest("/Users/andreascopp/Desktop/Client-TestFiles/invio_client2.txt");
+            addFileTest();
             break;
         default:
             std::cout << "Error!" << std::endl;
