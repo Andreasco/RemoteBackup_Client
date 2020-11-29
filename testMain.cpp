@@ -121,7 +121,7 @@ void getFilesystemStatusTest(){
 
 void checksum(){
     std::string checksum = sha256("prova");
-    std::cout << "Checksum: " << checksum << std::endl; //FIXME è diverso da quello di openSSL
+    std::cout << "Checksum: " << checksum << std::endl;
 }
 
 int main() {
