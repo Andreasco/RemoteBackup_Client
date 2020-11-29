@@ -51,19 +51,29 @@ void sendStringTest(){
     s.prova("0.0.0.0", 1234);*/
 }
 
+void readFileTest(){
+    Connection s("0.0.0.0", 1234, "/Users/andreascopp/Desktop/Client-TestFiles/");
+    std::string input;
+    s.read_file();
+}
+
 void addFileTest(){
     std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
     Connection s("0.0.0.0", 5004, base_path_);
 
-    s.send_string("login guido guido.poli");
+    //std::cout << s.read_string() << std::endl;
 
     std::string input;
-    while (input != "y" && input != "n") {
+    std::cout << "Do you want login now?(y/n): ";
+    std::getline(std::cin, input);
+    if (input == "y") {
+        s.send_string("login guido guido.poli");
+
         std::cout << "Do you want to send the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
             s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
-            s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client2.txt");
+            //s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client2.txt");
 
             // In order to wait the sending of the files, since they are made by different threads
             std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -72,15 +82,41 @@ void addFileTest(){
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
         }
-        else
-            std::cout << "Enter a valid selection!" << std::endl;
     }
 }
 
-void readFileTest(){
-    Connection s("0.0.0.0", 1234, "/Users/andreascopp/Desktop/Client-TestFiles/");
+void getFilesystemStatusTest(){
+    std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
+    Connection s("0.0.0.0", 5004, base_path_);
+
+    //std::cout << s.read_string() << std::endl;
+
     std::string input;
-    s.read_file();
+    std::cout << "Do you want login now?(y/n): ";
+    std::getline(std::cin, input);
+    if (input == "y") {
+        s.send_string("login guido guido.poli");
+
+        std::cout << "Do you want to get the filesystem status now?(y/n): ";
+        std::getline(std::cin, input);
+        if (input == "y") {
+            std::unordered_map<std::string, int> m = s.get_filesystem_status();
+
+            // Print the filesystem
+            std::for_each(m.begin(),
+                          m.end(),
+                          [](const std::pair<std::string, int> &p) {
+                              std::cout << "{" << p.first << ": " << p.second << "}\n";
+                          });
+
+            // In order to wait the sending of the files, since they are made by different threads
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            s.send_string("close");
+        }
+        else if (input == "n"){
+            std::cout << "Ok bye!" << std::endl;
+        }
+    }
 }
 
 void checksum(){
@@ -97,6 +133,7 @@ int main() {
     std::cout << "2 - readFileTest" << std::endl;
     std::cout << "3 - checksumTest" << std::endl;
     std::cout << "4 - addFileTest" << std::endl;
+    std::cout << "5 - getFilesystemStatusTest" << std::endl;
 
     std::cout << "Enter selection: ";
 
@@ -124,6 +161,10 @@ int main() {
         case 4:
             std::cout << "Add File Test Initialized" << std::endl;
             addFileTest();
+            break;
+        case 5:
+            std::cout << "Get Filesystem Status Test Initialized" << std::endl;
+            getFilesystemStatusTest();
             break;
         default:
             std::cout << "Error!" << std::endl;
