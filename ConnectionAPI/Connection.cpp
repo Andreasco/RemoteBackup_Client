@@ -168,7 +168,7 @@ public:
 
 
         // I hope I'll be able to delete this
-        std::string message = "login guido guido.poli";
+        std::string message = "login guido guido.poli"; //TODO rendere parametrico
         send_string(socket, message);
 
         std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
@@ -415,13 +415,13 @@ public:
 
     /******************* SERIALIZATION ******************************************************************************/
 
-    std::unordered_map<std::string, int> get_filesystem_status(){
+    std::unordered_map<std::string, std::string> get_filesystem_status(){
         send_string("checkFilesystemStatus");
         std::string serialized_data = read_string();
         std::stringstream archive_stream(serialized_data);
         boost::archive::text_iarchive archive(archive_stream);
 
-        std::unordered_map<std::string, int> filesystem_status;
+        std::unordered_map<std::string, std::string> filesystem_status;
         archive >> filesystem_status;
         return filesystem_status;
     }

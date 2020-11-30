@@ -23,3 +23,7 @@ std::string get_file_checksum(const std::string& file_path){
     return sha256(serialized_file);
 }
 
+bool compare_checksums(const std::string& checksum1, const std::string& checksum2){
+    return checksum1 == checksum2;
+}
+
