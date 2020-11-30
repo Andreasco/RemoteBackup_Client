@@ -4,13 +4,7 @@ project(RemoteBackup_Client)
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(RemoteBackup_Client testMain.cpp FileWatcher/FileWatcher.cpp
-        FileWatcher/FileWatcher.h ConnectionAPI/Connection.cpp ChecksumAPI/SHA256.cpp ChecksumAPI/SHA256.h)
-
-# In order to include Boost libraries
-#find_package(Boost)
-#IF (Boost_FOUND)
-#    include_directories(${Boost_INCLUDE_DIR})
-#endif()
+        FileWatcher/FileWatcher.h ConnectionAPI/Connection.cpp ChecksumAPI/SHA256.cpp ChecksumAPI/SHA256.h ChecksumAPI/Checksum.cpp ChecksumAPI/Checksum.h)
 
 set(Boost_INCLUDE_DIR /usr/local/opt/boost-1.73.0/include)
 set(Boost_LIBRARY_DIR /usr/local/opt/boost-1.73.0/lib)

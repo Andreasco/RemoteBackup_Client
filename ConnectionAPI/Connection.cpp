@@ -154,7 +154,7 @@ public:
             }
         }
         else {
-            std::cout << "[ERROR] In function: " << __FUNCTION__ << " Send failed: " << error.message() << std::endl;
+            //std::cout << "[ERROR] In function: " << __FUNCTION__ << " Send failed: " << error.message() << std::endl;
             print_string("[ERROR] In function: " + std::string(__FUNCTION__) + " Send failed: " + error.message());
         }
     }

@@ -2,7 +2,7 @@
 
 #include "FileWatcher/FileWatcher.h"
 #include "ConnectionAPI/Connection.cpp"
-#include "ChecksumAPI/SHA256.h"
+#include "ChecksumAPI/Checksum.h"
 
 void fileWatcherTest () {
     std::cout << "Enter path to watch: ";
@@ -55,6 +55,11 @@ void readFileTest(){
     Connection s("0.0.0.0", 1234, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::string input;
     s.read_file();
+}
+
+void checksum(){
+    std::string checksum = get_file_checksum("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
+    std::cout << "Checksum: " << checksum << std::endl;
 }
 
 void addFileTest(){
@@ -117,11 +122,6 @@ void getFilesystemStatusTest(){
             std::cout << "Ok bye!" << std::endl;
         }
     }
-}
-
-void checksum(){
-    std::string checksum = sha256("prova");
-    std::cout << "Checksum: " << checksum << std::endl;
 }
 
 int main() {
