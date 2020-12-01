@@ -143,6 +143,60 @@ RemoteBackup_Client/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/RemoteBackup_Client.dir/build.make CMakeFiles/RemoteBackup_Client.dir/build
 .PHONY : RemoteBackup_Client/fast
 
+ChecksumAPI/Checksum.o: ChecksumAPI/Checksum.cpp.o
+
+.PHONY : ChecksumAPI/Checksum.o
+
+# target to build an object file
+ChecksumAPI/Checksum.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RemoteBackup_Client.dir/build.make CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o
+.PHONY : ChecksumAPI/Checksum.cpp.o
+
+ChecksumAPI/Checksum.i: ChecksumAPI/Checksum.cpp.i
+
+.PHONY : ChecksumAPI/Checksum.i
+
+# target to preprocess a source file
+ChecksumAPI/Checksum.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RemoteBackup_Client.dir/build.make CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.i
+.PHONY : ChecksumAPI/Checksum.cpp.i
+
+ChecksumAPI/Checksum.s: ChecksumAPI/Checksum.cpp.s
+
+.PHONY : ChecksumAPI/Checksum.s
+
+# target to generate assembly for a file
+ChecksumAPI/Checksum.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RemoteBackup_Client.dir/build.make CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.s
+.PHONY : ChecksumAPI/Checksum.cpp.s
+
+ChecksumAPI/SHA256.o: ChecksumAPI/SHA256.cpp.o
+
+.PHONY : ChecksumAPI/SHA256.o
+
+# target to build an object file
+ChecksumAPI/SHA256.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RemoteBackup_Client.dir/build.make CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o
+.PHONY : ChecksumAPI/SHA256.cpp.o
+
+ChecksumAPI/SHA256.i: ChecksumAPI/SHA256.cpp.i
+
+.PHONY : ChecksumAPI/SHA256.i
+
+# target to preprocess a source file
+ChecksumAPI/SHA256.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RemoteBackup_Client.dir/build.make CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.i
+.PHONY : ChecksumAPI/SHA256.cpp.i
+
+ChecksumAPI/SHA256.s: ChecksumAPI/SHA256.cpp.s
+
+.PHONY : ChecksumAPI/SHA256.s
+
+# target to generate assembly for a file
+ChecksumAPI/SHA256.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RemoteBackup_Client.dir/build.make CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.s
+.PHONY : ChecksumAPI/SHA256.cpp.s
+
 ConnectionAPI/Connection.o: ConnectionAPI/Connection.cpp.o
 
 .PHONY : ConnectionAPI/Connection.o
@@ -233,6 +287,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... RemoteBackup_Client"
+	@echo "... ChecksumAPI/Checksum.o"
+	@echo "... ChecksumAPI/Checksum.i"
+	@echo "... ChecksumAPI/Checksum.s"
+	@echo "... ChecksumAPI/SHA256.o"
+	@echo "... ChecksumAPI/SHA256.i"
+	@echo "... ChecksumAPI/SHA256.s"
 	@echo "... ConnectionAPI/Connection.o"
 	@echo "... ConnectionAPI/Connection.i"
 	@echo "... ConnectionAPI/Connection.s"

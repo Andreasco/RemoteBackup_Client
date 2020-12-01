@@ -3,36 +3,76 @@
 #include "FileWatcher/FileWatcher.h"
 #include "ChecksumAPI/SHA256.h"
 
+
 void fileWatcherTest () {
     std::cout << "Enter path to watch: ";
     std::string path_to_watch;
     std::cin>>path_to_watch;
 
     // Create a Connection
-    Connection conn_("0.0.0.0", 5007, path_to_watch);
+    Connection conn_("0.0.0.0", 5004, path_to_watch);
     conn_.send_string("login guido guido.poli");
     conn_.read_string();
 
+    FileWatcher fw_server{"/home/cbrugo/Desktop/PoliTo/PdS/Progetto/server/RemoteBackup_Server/synchronized_folders/guido", std::chrono::milliseconds(5000),
+                          conn_};
+
+    if(DEBUG)
+        std::cout << "[DEBUG] Filewatcher Object Initialization" << std::endl;
+
     // Create a FileWatcher instance that will check the current folder for changes every 5 seconds
     FileWatcher fw{path_to_watch, std::chrono::milliseconds(5000), conn_};
+    if(DEBUG)
+        std::cout << "[DEBUG] Filewatcher Object Initialized" << std::endl;
 
-    // Start monitoring a folder for changes and (in case of changes)
-    // run a user provided lambda function
-    fw.start([] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
+    fw.initial_check(fw_server.paths_, [] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
         // Process only regular files, all other file types are ignored
+
         if(!std::filesystem::is_regular_file(std::filesystem::path(file_path))) {
             return;
         }
 
         switch(status) {
             case FileStatus::created:
-                conn_.send_file(file_path);
+                conn_.add_file(file_path);
                 std::cout << "File created: " << file_path << '\n';
                 break;
             case FileStatus::modified:
+                conn_.update_file(file_path);
                 std::cout << "File modified: " << file_path << '\n';
                 break;
             case FileStatus::erased:
+                conn_.remove_file(file_path);
+                std::cout << "File erased: " << file_path << '\n';
+                break;
+            default:
+                std::cout << "Error! Unknown file status.\n";
+        }
+    });
+
+    if(DEBUG)
+        std::cout << "[DEBUG] Filewatcher Initial Check Completed" << std::endl;
+
+    // Start monitoring a folder for changes and (in case of changes)
+    // run a user provided lambda function
+    fw.start([] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
+        // Process only regular files, all other file types are ignored
+        /*
+        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path))) {
+            return;
+        }*/
+
+        switch(status) {
+            case FileStatus::created:
+                conn_.add_file(file_path);
+                std::cout << "File created: " << file_path << '\n';
+                break;
+            case FileStatus::modified:
+                conn_.update_file(file_path);
+                std::cout << "File modified: " << file_path << '\n';
+                break;
+            case FileStatus::erased:
+                conn_.remove_file(file_path);
                 std::cout << "File erased: " << file_path << '\n';
                 break;
             default:
@@ -63,7 +103,7 @@ void sendFileTest(){
         std::cout << "Do you want to send the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
-            s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
+            //s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
@@ -77,7 +117,7 @@ void sendFile2(){
     Connection s("0.0.0.0", 5002, "/Users/andreascopp/Desktop/Client-TestFiles/");
     s.send_string("login guido guido.poli");
     s.read_string();
-    s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
+    //s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
 }
 
 void readFileTest(){

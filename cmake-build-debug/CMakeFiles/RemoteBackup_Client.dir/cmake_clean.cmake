@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o"
+  "CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o"
   "CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o"
   "CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o"
   "CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o"

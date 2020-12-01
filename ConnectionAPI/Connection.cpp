@@ -420,7 +420,6 @@ public:
         std::string serialized_data = read_string();
         std::stringstream archive_stream(serialized_data);
         boost::archive::text_iarchive archive(archive_stream);
-
         std::unordered_map<std::string, std::string> filesystem_status;
         archive >> filesystem_status;
         return filesystem_status;

@@ -17,8 +17,12 @@
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Boost-1.71.0
 
+Boost_FILESYSTEM_LIBRARY_RELEASE:STRING=/usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0
+
 //Path to a file.
 Boost_INCLUDE_DIR:PATH=/usr/include
+
+Boost_SERIALIZATION_LIBRARY_RELEASE:STRING=/usr/lib/x86_64-linux-gnu/libboost_serialization.so.1.71.0
 
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
@@ -238,8 +242,17 @@ RemoteBackup_Client_BINARY_DIR:STATIC=/home/cbrugo/CLionProjects/RemoteBackup_Cl
 //Value Computed by CMake
 RemoteBackup_Client_SOURCE_DIR:STATIC=/home/cbrugo/CLionProjects/RemoteBackup_Client
 
+//The directory containing a CMake configuration file for boost_archive.
+boost_archive_DIR:PATH=boost_archive_DIR-NOTFOUND
+
+//The directory containing a CMake configuration file for boost_filesystem.
+boost_filesystem_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_filesystem-1.71.0
+
 //The directory containing a CMake configuration file for boost_headers.
 boost_headers_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_headers-1.71.0
+
+//The directory containing a CMake configuration file for boost_serialization.
+boost_serialization_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_serialization-1.71.0
 
 
 ########################
@@ -402,7 +415,7 @@ CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding Boost
-FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[/usr/lib/x86_64-linux-gnu/cmake/Boost-1.71.0/BoostConfig.cmake][c ][v1.71.0()]
+FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[/usr/lib/x86_64-linux-gnu/cmake/Boost-1.71.0/BoostConfig.cmake][cfound components: serialization filesystem ][v1.71.0()]
 //ADVANCED property for variable: ProcessorCount_cmd_nproc
 ProcessorCount_cmd_nproc-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ProcessorCount_cmd_sysctl
@@ -415,6 +428,10 @@ _Boost_INCLUDE_DIR_LAST:INTERNAL=Boost_INCLUDE_DIR-NOTFOUND
 _Boost_NAMESPACE_LAST:INTERNAL=boost
 //Last used Boost_USE_MULTITHREADED value.
 _Boost_USE_MULTITHREADED_LAST:INTERNAL=TRUE
+//ADVANCED property for variable: boost_filesystem_DIR
+boost_filesystem_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: boost_headers_DIR
 boost_headers_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: boost_serialization_DIR
+boost_serialization_DIR-ADVANCED:INTERNAL=1
 

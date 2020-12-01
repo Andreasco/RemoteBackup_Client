@@ -6,12 +6,40 @@
 
 #IncludeRegexTransform: 
 
+/home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/Checksum.h
+iostream
+-
+fstream
+-
+sstream
+-
+boost/serialization/string.hpp
+-
+boost/serialization/array.hpp
+-
+boost/archive/text_oarchive.hpp
+-
+SHA256.h
+/home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/SHA256.h
+
+/home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/SHA256.h
+string
+-
+
 /home/cbrugo/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp
 iostream
+-
+fstream
 -
 boost/asio.hpp
 -
 boost/array.hpp
+-
+boost/serialization/unordered_map.hpp
+-
+boost/serialization/string.hpp
+-
+boost/archive/text_iarchive.hpp
 -
 
 /home/cbrugo/CLionProjects/RemoteBackup_Client/FileWatcher/FileWatcher.cpp
@@ -35,12 +63,16 @@ string
 -
 functional
 -
+../ConnectionAPI/Connection.cpp
+/home/cbrugo/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp
+../ChecksumAPI/Checksum.h
+/home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/Checksum.h
 
-/home/cbrugo/CLionProjects/RemoteBackup_Client/main.cpp
+/home/cbrugo/CLionProjects/RemoteBackup_Client/testMain.cpp
 iostream
 -
 FileWatcher/FileWatcher.h
 /home/cbrugo/CLionProjects/RemoteBackup_Client/FileWatcher/FileWatcher.h
-ConnectionAPI/Connection.cpp
-/home/cbrugo/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp
+ChecksumAPI/SHA256.h
+/home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/SHA256.h
 

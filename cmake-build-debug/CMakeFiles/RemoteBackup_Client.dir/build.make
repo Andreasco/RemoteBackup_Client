@@ -116,11 +116,39 @@ CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/cbrugo/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp -o CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.s
 
+CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o: CMakeFiles/RemoteBackup_Client.dir/flags.make
+CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o: ../ChecksumAPI/SHA256.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cbrugo/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o -c /home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/SHA256.cpp
+
+CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/SHA256.cpp > CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.i
+
+CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/SHA256.cpp -o CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.s
+
+CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o: CMakeFiles/RemoteBackup_Client.dir/flags.make
+CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o: ../ChecksumAPI/Checksum.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/cbrugo/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o -c /home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/Checksum.cpp
+
+CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/Checksum.cpp > CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.i
+
+CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/Checksum.cpp -o CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.s
+
 # Object files for target RemoteBackup_Client
 RemoteBackup_Client_OBJECTS = \
 "CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o" \
 "CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o" \
-"CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o"
+"CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o" \
+"CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o" \
+"CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o"
 
 # External object files for target RemoteBackup_Client
 RemoteBackup_Client_EXTERNAL_OBJECTS =
@@ -128,9 +156,13 @@ RemoteBackup_Client_EXTERNAL_OBJECTS =
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o
+RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o
+RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/build.make
+RemoteBackup_Client: /usr/lib/x86_64-linux-gnu/libboost_serialization.so.1.71.0
+RemoteBackup_Client: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/cbrugo/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable RemoteBackup_Client"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/cbrugo/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable RemoteBackup_Client"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/RemoteBackup_Client.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

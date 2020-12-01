@@ -5,7 +5,7 @@
 		<Option title="RemoteBackup_Client"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
-		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\usr\;CMake Files\..\..\..\..\usr\lib\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Boost-1.71.0\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_headers-1.71.0\;"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\usr\;CMake Files\..\..\..\..\usr\lib\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Boost-1.71.0\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_headers-1.71.0\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_serialization-1.71.0\;CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_filesystem-1.71.0\;"/>
 		<Build>
 			<Target title="all">
 				<Option working_dir="/home/cbrugo/CLionProjects/RemoteBackup_Client/cmake-build-debug"/>
@@ -44,6 +44,9 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
+					<Add option="-DBOOST_SERIALIZATION_DYN_LINK"/>
+					<Add option="-DBOOST_ALL_NO_LIB"/>
+					<Add option="-DBOOST_FILESYSTEM_DYN_LINK"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -66,6 +69,9 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
+					<Add option="-DBOOST_SERIALIZATION_DYN_LINK"/>
+					<Add option="-DBOOST_ALL_NO_LIB"/>
+					<Add option="-DBOOST_FILESYSTEM_DYN_LINK"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -82,6 +88,18 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/Checksum.cpp">
+			<Option target="RemoteBackup_Client"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/Checksum.h">
+			<Option target="RemoteBackup_Client"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/SHA256.cpp">
+			<Option target="RemoteBackup_Client"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/ChecksumAPI/SHA256.h">
+			<Option target="RemoteBackup_Client"/>
+		</Unit>
 		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp">
 			<Option target="RemoteBackup_Client"/>
 		</Unit>
@@ -97,6 +115,9 @@
 		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/BoostDetectToolset-1.71.0.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\"/>
+		</Unit>
 		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/Boost-1.71.0/BoostConfig.cmake">
 			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\Boost-1.71.0\"/>
 		</Unit>
@@ -108,6 +129,30 @@
 		</Unit>
 		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/boost_headers-1.71.0/boost_headers-config.cmake">
 			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_headers-1.71.0\"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/boost_serialization-1.71.0/boost_serialization-config-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_serialization-1.71.0\"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/boost_serialization-1.71.0/boost_serialization-config.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_serialization-1.71.0\"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/boost_serialization-1.71.0/libboost_serialization-variant-shared.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_serialization-1.71.0\"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/boost_serialization-1.71.0/libboost_serialization-variant-static.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_serialization-1.71.0\"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/boost_filesystem-1.71.0/boost_filesystem-config-version.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_filesystem-1.71.0\"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/boost_filesystem-1.71.0/boost_filesystem-config.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_filesystem-1.71.0\"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/boost_filesystem-1.71.0/libboost_filesystem-variant-shared.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_filesystem-1.71.0\"/>
+		</Unit>
+		<Unit filename="/home/cbrugo/CLionProjects/RemoteBackup_Client/../../../../usr/lib/x86_64-linux-gnu/cmake/boost_filesystem-1.71.0/libboost_filesystem-variant-static.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\usr\lib\x86_64-linux-gnu\cmake\boost_filesystem-1.71.0\"/>
 		</Unit>
 	</Project>
 </CodeBlocks_project_file>
