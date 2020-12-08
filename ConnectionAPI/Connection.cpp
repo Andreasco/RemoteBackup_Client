@@ -162,131 +162,64 @@ public:
     /******************* FILES METHODS ******************************************************************************/
 
     void remove_file(const std::string& file_path){
-        // Everytime i send a file I open a new socket so that I can send multiple files asynchronously
-        std::shared_ptr<tcp::socket> socket = std::make_shared<tcp::socket>(io_context_);
-        socket->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
-
-
-        // I hope I'll be able to delete this
-        std::string message = "login guido guido.poli"; //TODO rendere parametrico
-        send_string(socket, message);
-
         std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
 
         std::ostringstream oss;
         oss << "removeFile ";
         oss << cleaned_file_path;
         oss << "\n";
-        send_string(socket, oss.str());
+        send_string(oss.str());
 
         // Read the confirm of receipt from the server
-        print_string(read_string(socket));
-
-        close_connection(socket);
-    }
-
-
-    void add_file(const std::string& file_path){
-        boost::asio::post(pool_, [this, file_path] {
-            // Everytime i send a file I open a new socket so that I can send multiple files asynchronously
-            std::shared_ptr<tcp::socket> socket = std::make_shared<tcp::socket>(io_context_);
-            socket->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
-
-
-            // I hope I'll be able to delete this
-            std::string message = "login guido guido.poli";
-            send_string(socket, message);
-
-            // Open the file to send
-            std::ifstream source_file(file_path, std::ios_base::binary | std::ios_base::ate);
-            if(!source_file) {
-                //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
-                print_string("[ERROR] Failed to open " + file_path);
-                //TODO gestire errore
-            }
-
-            std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
-            size_t file_size = source_file.tellg();
-            std::string file_size_readable = file_size_to_readable(file_size);
-
-            if(DEBUG) {
-                //std::cout << "[DEBUG] " << file_path << " size is: " << file_size_readable << std::endl;
-                print_string("[DEBUG] " + file_path + " size is: " + file_size_readable);
-                //std::cout << "[DEBUG] Cleaned file path: " << cleaned_file_path << std::endl;
-                print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
-            }
-
-            std::ostringstream oss;
-            oss << "addFile ";
-            oss << cleaned_file_path;
-            oss << " ";
-            oss << file_size;
-            oss << "\n";
-            send_string(socket, oss.str());
-
-            handle_send_file(std::move(source_file), socket);
-
-            // Read the confirm of receipt from the server
-            print_string(read_string(socket));
-
-            close_connection(socket);
-
-            //std::cout << "\n" << "[INFO] File " << file_path << " sent successfully!" << std::endl;
-            print_string(std::string("\n") + "[INFO] File " + file_path + " sent successfully!");
-        });
+        print_string(read_string());
     }
 
     void update_file(const std::string& file_path){
-        boost::asio::post(pool_, [this, file_path] {
-            // Everytime i send a file I open a new socket so that I can send multiple files asynchronously
-            std::shared_ptr<tcp::socket> socket = std::make_shared<tcp::socket>(io_context_);
-            socket->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
-
-
-            // I hope I'll be able to delete this
-            std::string message = "login guido guido.poli";
-            send_string(socket, message);
-
-            // Open the file to send
-            std::ifstream source_file(file_path, std::ios_base::binary | std::ios_base::ate);
-            if(!source_file) {
-                //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
-                print_string("[ERROR] Failed to open " + file_path);
-                //TODO gestire errore
-            }
-
-            std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
-            size_t file_size = source_file.tellg();
-            std::string file_size_readable = file_size_to_readable(file_size);
-
-            if(DEBUG) {
-                //std::cout << "[DEBUG] " << file_path << " size is: " << file_size_readable << std::endl;
-                print_string("[DEBUG] " + file_path + " size is: " + file_size_readable);
-                //std::cout << "[DEBUG] Cleaned file path: " << cleaned_file_path << std::endl;
-                print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
-            }
-
-            std::ostringstream oss;
-            oss << "updateFile ";
-            oss << cleaned_file_path;
-            oss << " ";
-            oss << file_size;
-            oss << "\n";
-            send_string(socket, oss.str());
-
-            handle_send_file(std::move(source_file), socket);
-
-            // Read the confirm of receipt from the server
-            print_string(read_string(socket));
-
-            close_connection(socket);
-
-            //std::cout << "\n" << "[INFO] File " << file_path << " sent successfully!" << std::endl;
-            print_string(std::string("\n") + "[INFO] File " + file_path + " sent successfully!");
-        });
+        handle_send_file(file_path, "updateFile");
     }
 
-    static void handle_send_file(std::ifstream source_file, const std::shared_ptr<tcp::socket>& socket) {
+    void add_file(const std::string& file_path){
+        handle_send_file(file_path, "addFile");
+    }
+
+    void handle_send_file(const std::string& file_path, const std::string& command){
+        // Open the file to send
+        std::ifstream source_file(file_path, std::ios_base::binary | std::ios_base::ate);
+        if(!source_file) {
+            //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
+            print_string("[ERROR] Failed to open " + file_path);
+            //TODO gestire errore
+        }
+
+        std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
+        size_t file_size = source_file.tellg();
+        std::string file_size_readable = file_size_to_readable(file_size);
+
+        if(DEBUG) {
+            //std::cout << "[DEBUG] " << file_path << " size is: " << file_size_readable << std::endl;
+            print_string("[DEBUG] " + file_path + " size is: " + file_size_readable);
+            //std::cout << "[DEBUG] Cleaned file path: " << cleaned_file_path << std::endl;
+            print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
+        }
+
+        std::ostringstream oss;
+        oss << command + " ";
+        oss << cleaned_file_path;
+        oss << " ";
+        oss << file_size;
+        oss << "\n";
+        send_string(oss.str());
+
+        do_send_file(std::move(source_file));
+
+        // Read the confirm of receipt from the server
+        print_string(read_string());
+
+        //std::cout << "\n" << "[INFO] File " << file_path << " sent successfully!" << std::endl;
+        print_string(std::string("\n") + "[INFO] File " + file_path + " sent successfully!");
+    }
+
+    void do_send_file(std::ifstream source_file) {
         // This buffer's size determines the MTU, therefore how many bytes at time get copied
         // from source file to such buffer, which means how many bytes get sent everytime
         boost::array<char, 1024> buf{};
@@ -320,7 +253,7 @@ public:
                 //TODO gestire questo errore
             }
 
-            boost::asio::write(*socket, boost::asio::buffer(buf.c_array(), source_file.gcount()),
+            boost::asio::write(*main_socket_, boost::asio::buffer(buf.c_array(), source_file.gcount()),
                                boost::asio::transfer_all(), error);
             if(error) {
                 std::cout << "[ERROR] Send file error: " << error << std::endl;
@@ -330,7 +263,7 @@ public:
             bytes_sent += bytes_read_from_file;
 
             percent = std::ceil((100.0 * bytes_sent) / file_size);
-            //print_percentage(percent);
+            print_percentage(percent);
         }
 
         //TODO cercare di sportarlo fuori dalla funzione
