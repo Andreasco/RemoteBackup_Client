@@ -186,7 +186,6 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     oss << cleaned_file_path;
     oss << " ";
     oss << file_size;
-    oss << "\n";
     send_string(oss.str());
 
     do_send_file(std::move(source_file));
