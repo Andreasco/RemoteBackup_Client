@@ -102,9 +102,9 @@ void readFileTest(){
     s.read_file();
 }
 
-void checksum(){
+void checksumTest(){
     std::string checksum = get_file_checksum("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
-    std::cout << "Checksum: " << checksum << std::endl;
+    std::cout << "File checksum: " << checksum << std::endl;
 }
 
 void addFileTest(){
@@ -201,7 +201,7 @@ int main() {
             break;
         case 3:
             std::cout << "Checksum Test Initialized" << std::endl;
-            checksum();
+            checksumTest();
             break;
         case 4:
             std::cout << "Add File Test Initialized" << std::endl;
