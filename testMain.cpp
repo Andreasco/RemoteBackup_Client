@@ -1,79 +1,34 @@
 #include <iostream>
 
 #include "FileWatcher/FileWatcher.h"
-#include "ChecksumAPI/SHA256.h"
-
+#include "ConnectionAPI/Connection.cpp"
+#include "ChecksumAPI/Checksum.h"
 
 void fileWatcherTest () {
     std::cout << "Enter path to watch: ";
     std::string path_to_watch;
     std::cin>>path_to_watch;
 
-    // Create a Connection
-    Connection conn_("0.0.0.0", 5004, path_to_watch);
-    conn_.send_string("login guido guido.poli");
-    conn_.read_string();
-
-    FileWatcher fw_server{"/home/cbrugo/Desktop/PoliTo/PdS/Progetto/server/RemoteBackup_Server/synchronized_folders/guido", std::chrono::milliseconds(5000),
-                          conn_};
-
-    if(DEBUG)
-        std::cout << "[DEBUG] Filewatcher Object Initialization" << std::endl;
-
     // Create a FileWatcher instance that will check the current folder for changes every 5 seconds
-    FileWatcher fw{path_to_watch, std::chrono::milliseconds(5000), conn_};
-    if(DEBUG)
-        std::cout << "[DEBUG] Filewatcher Object Initialized" << std::endl;
-
-    fw.initial_check(fw_server.paths_, [] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
-        // Process only regular files, all other file types are ignored
-
-        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path))) {
-            return;
-        }
-
-        switch(status) {
-            case FileStatus::created:
-                conn_.add_file(file_path);
-                std::cout << "File created: " << file_path << '\n';
-                break;
-            case FileStatus::modified:
-                conn_.update_file(file_path);
-                std::cout << "File modified: " << file_path << '\n';
-                break;
-            case FileStatus::erased:
-                conn_.remove_file(file_path);
-                std::cout << "File erased: " << file_path << '\n';
-                break;
-            default:
-                std::cout << "Error! Unknown file status.\n";
-        }
-    });
-
-    if(DEBUG)
-        std::cout << "[DEBUG] Filewatcher Initial Check Completed" << std::endl;
+    FileWatcher fw{path_to_watch, std::chrono::milliseconds(5000)};
 
     // Start monitoring a folder for changes and (in case of changes)
     // run a user provided lambda function
-    fw.start([] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
+    fw.start([] (const std::string& path_to_watch, FileStatus status) -> void {
         // Process only regular files, all other file types are ignored
-        /*
-        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path))) {
+        if(!std::filesystem::is_regular_file(std::filesystem::path(path_to_watch)) && status != FileStatus::erased) {
             return;
-        }*/
+        }
 
         switch(status) {
             case FileStatus::created:
-                conn_.add_file(file_path);
-                std::cout << "File created: " << file_path << '\n';
+                std::cout << "File created: " << path_to_watch << '\n';
                 break;
             case FileStatus::modified:
-                conn_.update_file(file_path);
-                std::cout << "File modified: " << file_path << '\n';
+                std::cout << "File modified: " << path_to_watch << '\n';
                 break;
             case FileStatus::erased:
-                conn_.remove_file(file_path);
-                std::cout << "File erased: " << file_path << '\n';
+                std::cout << "File erased: " << path_to_watch << '\n';
                 break;
             default:
                 std::cout << "Error! Unknown file status.\n";
@@ -81,7 +36,7 @@ void fileWatcherTest () {
     });
 }
 
-void socketTest(){
+void sendStringTest(){
     Connection s("0.0.0.0", 5007, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::cout << s.read_string(); //Leggo quello che mi arriva appena instauro la connessione
     std::string message;
@@ -96,30 +51,6 @@ void socketTest(){
     s.prova("0.0.0.0", 1234);*/
 }
 
-void sendFileTest(){
-    Connection s("0.0.0.0", 5002, "/Users/andreascopp/Desktop/Client-TestFiles/");
-    std::string input;
-    while (input != "y" && input != "n") {
-        std::cout << "Do you want to send the file now?(y/n): ";
-        std::getline(std::cin, input);
-        if (input == "y") {
-            //s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
-        }
-        else if (input == "n"){
-            std::cout << "Ok bye!" << std::endl;
-        }
-        else
-            std::cout << "Enter a valid selection!" << std::endl;
-    }
-}
-
-void sendFile2(){
-    Connection s("0.0.0.0", 5002, "/Users/andreascopp/Desktop/Client-TestFiles/");
-    s.send_string("login guido guido.poli");
-    s.read_string();
-    //s.send_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client_grande.txt");
-}
-
 void readFileTest(){
     Connection s("0.0.0.0", 1234, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::string input;
@@ -127,8 +58,70 @@ void readFileTest(){
 }
 
 void checksum(){
-    std::string checksum = sha256("prova");
-    std::cout << "Checksum: " << checksum << std::endl; //FIXME è diverso da quello di openSSL
+    std::string checksum = get_file_checksum("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
+    std::cout << "Checksum: " << checksum << std::endl;
+}
+
+void addFileTest(){
+    std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
+    Connection s("0.0.0.0", 5004, base_path_);
+
+    //std::cout << s.read_string() << std::endl;
+
+    std::string input;
+    std::cout << "Do you want login now?(y/n): ";
+    std::getline(std::cin, input);
+    if (input == "y") {
+        s.send_string("login guido guido.poli");
+
+        std::cout << "Do you want to send the file now?(y/n): ";
+        std::getline(std::cin, input);
+        if (input == "y") {
+            s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
+            //s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client2.txt");
+
+            // In order to wait the sending of the files, since they are made by different threads
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            s.send_string("close");
+        }
+        else if (input == "n"){
+            std::cout << "Ok bye!" << std::endl;
+        }
+    }
+}
+
+void getFilesystemStatusTest(){
+    std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
+    Connection s("0.0.0.0", 5004, base_path_);
+
+    //std::cout << s.read_string() << std::endl;
+
+    std::string input;
+    std::cout << "Do you want login now?(y/n): ";
+    std::getline(std::cin, input);
+    if (input == "y") {
+        s.send_string("login guido guido.poli");
+
+        std::cout << "Do you want to get the filesystem status now?(y/n): ";
+        std::getline(std::cin, input);
+        if (input == "y") {
+            std::unordered_map<std::string, std::string> m = s.get_filesystem_status();
+
+            // Print the filesystem
+            std::for_each(m.begin(),
+                          m.end(),
+                          [](const std::pair<std::string, int> &p) {
+                              std::cout << "{" << p.first << ": " << p.second << "}\n";
+                          });
+
+            // In order to wait the sending of the files, since they are made by different threads
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            s.send_string("close");
+        }
+        else if (input == "n"){
+            std::cout << "Ok bye!" << std::endl;
+        }
+    }
 }
 
 int main() {
@@ -136,11 +129,11 @@ int main() {
 
     // Add new options as needed
     std::cout << "0 - fileWatcherTest" << std::endl;
-    std::cout << "1 - socketTest" << std::endl;
-    std::cout << "2 - sendFileTest" << std::endl;
-    std::cout << "3 - readFileTest" << std::endl;
-    std::cout << "4 - checksumTest" << std::endl;
-    std::cout << "5 - sendFile2" << std::endl;
+    std::cout << "1 - sendStringTest" << std::endl;
+    std::cout << "2 - readFileTest" << std::endl;
+    std::cout << "3 - checksumTest" << std::endl;
+    std::cout << "4 - addFileTest" << std::endl;
+    std::cout << "5 - getFilesystemStatusTest" << std::endl;
 
     std::cout << "Enter selection: ";
 
@@ -154,24 +147,24 @@ int main() {
             fileWatcherTest();
             break;
         case 1:
-            std::cout << "Socket Test Initialized" << std::endl;
-            socketTest();
+            std::cout << "Send String Test Initialized" << std::endl;
+            sendStringTest();
             break;
         case 2:
-            std::cout << "Send File Test Initialized" << std::endl;
-            sendFileTest();
-            break;
-        case 3:
             std::cout << "Read File Test Initialized" << std::endl;
             readFileTest();
             break;
-        case 4:
+        case 3:
             std::cout << "Checksum Test Initialized" << std::endl;
             checksum();
             break;
+        case 4:
+            std::cout << "Add File Test Initialized" << std::endl;
+            addFileTest();
+            break;
         case 5:
-            std::cout << "Send File 2 Test Initialized" << std::endl;
-            sendFile2();
+            std::cout << "Get Filesystem Status Test Initialized" << std::endl;
+            getFilesystemStatusTest();
             break;
         default:
             std::cout << "Error!" << std::endl;
