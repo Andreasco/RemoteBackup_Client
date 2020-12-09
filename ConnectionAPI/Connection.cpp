@@ -2,6 +2,9 @@
 // Created by Andrea Scoppetta on 07/10/2020.
 //
 
+#ifndef REMOTEBACKUP_CLIENT_CONNECTION
+#define REMOTEBACKUP_CLIENT_CONNECTION
+
 #include <iostream>
 #include <fstream>
 #include <boost/asio.hpp>
@@ -360,3 +363,5 @@ public:
     }
 
 };
+
+#endif

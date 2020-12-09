@@ -155,7 +155,7 @@ void getFilesystemStatusTest(){
             // Print the filesystem
             std::for_each(m.begin(),
                           m.end(),
-                          [](const std::pair<std::string, int> &p) {
+                          [](const std::pair<std::string, std::string> &p) {
                               std::cout << "{" << p.first << ": " << p.second << "}\n";
                           });
 
