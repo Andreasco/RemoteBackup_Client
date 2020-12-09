@@ -9,26 +9,71 @@ void fileWatcherTest () {
     std::string path_to_watch;
     std::cin>>path_to_watch;
 
-    // Create a FileWatcher instance that will check the current folder for changes every 5 seconds
-    FileWatcher fw{path_to_watch, std::chrono::milliseconds(5000)};
+    // Create a Connection
+    Connection conn_("0.0.0.0", 5004, path_to_watch);
+    conn_.send_string("login guido guido.poli");
+    conn_.read_string();
 
-    // Start monitoring a folder for changes and (in case of changes)
-    // run a user provided lambda function
-    fw.start([] (const std::string& path_to_watch, FileStatus status) -> void {
+    FileWatcher fw_server{"/home/cbrugo/Desktop/PoliTo/PdS/Progetto/server/RemoteBackup_Server/synchronized_folders/guido", std::chrono::milliseconds(5000),
+                          conn_};
+
+    if(DEBUG)
+        std::cout << "[DEBUG] Filewatcher Object Initialization" << std::endl;
+
+    // Create a FileWatcher instance that will check the current folder for changes every 5 seconds
+    FileWatcher fw{path_to_watch, std::chrono::milliseconds(5000), conn_};
+    if(DEBUG)
+        std::cout << "[DEBUG] Filewatcher Object Initialized" << std::endl;
+
+    fw.initial_check(fw_server.paths_, [] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
         // Process only regular files, all other file types are ignored
-        if(!std::filesystem::is_regular_file(std::filesystem::path(path_to_watch)) && status != FileStatus::erased) {
+
+        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path))) {
             return;
         }
 
         switch(status) {
             case FileStatus::created:
-                std::cout << "File created: " << path_to_watch << '\n';
+                conn_.add_file(file_path);
+                std::cout << "File created: " << file_path << '\n';
                 break;
             case FileStatus::modified:
-                std::cout << "File modified: " << path_to_watch << '\n';
+                conn_.update_file(file_path);
+                std::cout << "File modified: " << file_path << '\n';
                 break;
             case FileStatus::erased:
-                std::cout << "File erased: " << path_to_watch << '\n';
+                conn_.remove_file(file_path);
+                std::cout << "File erased: " << file_path << '\n';
+                break;
+            default:
+                std::cout << "Error! Unknown file status.\n";
+        }
+    });
+
+    if(DEBUG)
+        std::cout << "[DEBUG] Filewatcher Initial Check Completed" << std::endl;
+
+    // Start monitoring a folder for changes and (in case of changes)
+    // run a user provided lambda function
+    fw.start([] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
+        // Process only regular files, all other file types are ignored
+        /*
+        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path))) {
+            return;
+        }*/
+
+        switch(status) {
+            case FileStatus::created:
+                conn_.add_file(file_path);
+                std::cout << "File created: " << file_path << '\n';
+                break;
+            case FileStatus::modified:
+                conn_.update_file(file_path);
+                std::cout << "File modified: " << file_path << '\n';
+                break;
+            case FileStatus::erased:
+                conn_.remove_file(file_path);
+                std::cout << "File erased: " << file_path << '\n';
                 break;
             default:
                 std::cout << "Error! Unknown file status.\n";
