@@ -13,7 +13,7 @@
 #include <map>
 #include <string>
 #include <functional>
-#include "../ConnectionAPI/Connection.cpp"
+#include "../ConnectionAPI/Connection.h"
 #include "../ChecksumAPI/Checksum.h"
 
 // Define available file changes

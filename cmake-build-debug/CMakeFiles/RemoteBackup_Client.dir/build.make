@@ -103,22 +103,9 @@ CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.s"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/FileWatcher/FileWatcher.cpp -o CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.s
 
-CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: CMakeFiles/RemoteBackup_Client.dir/flags.make
-CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: ../ConnectionAPI/Connection.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o -c /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp
-
-CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp > CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.i
-
-CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp -o CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.s
-
 CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o: CMakeFiles/RemoteBackup_Client.dir/flags.make
 CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o: ../ChecksumAPI/SHA256.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o"
 	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o -c /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ChecksumAPI/SHA256.cpp
 
 CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.i: cmake_force
@@ -131,7 +118,7 @@ CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.s: cmake_force
 
 CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o: CMakeFiles/RemoteBackup_Client.dir/flags.make
 CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o: ../ChecksumAPI/Checksum.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o"
 	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o -c /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ChecksumAPI/Checksum.cpp
 
 CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.i: cmake_force
@@ -142,22 +129,35 @@ CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.s"
 	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ChecksumAPI/Checksum.cpp -o CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.s
 
+CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: CMakeFiles/RemoteBackup_Client.dir/flags.make
+CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: ../ConnectionAPI/Connection.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o -c /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp
+
+CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.i"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp > CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.i
+
+CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.s"
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp -o CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.s
+
 # Object files for target RemoteBackup_Client
 RemoteBackup_Client_OBJECTS = \
 "CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o" \
 "CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o" \
-"CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o" \
 "CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o" \
-"CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o"
+"CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o" \
+"CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o"
 
 # External object files for target RemoteBackup_Client
 RemoteBackup_Client_EXTERNAL_OBJECTS =
 
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o
-RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/Checksum.cpp.o
+RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/build.make
 RemoteBackup_Client: /usr/local/opt/boost-1.73.0/lib/libboost_serialization.dylib
 RemoteBackup_Client: /usr/local/opt/boost-1.73.0/lib/libboost_filesystem.dylib

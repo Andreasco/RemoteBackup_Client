@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "FileWatcher/FileWatcher.h"
-#include "ConnectionAPI/Connection.cpp"
+#include "ConnectionAPI/Connection.h"
 #include "ChecksumAPI/Checksum.h"
 
 void fileWatcherTest () {

@@ -514,6 +514,7 @@ CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o: ../ChecksumAPI/SHA2
 CMakeFiles/RemoteBackup_Client.dir/ChecksumAPI/SHA256.cpp.o: ../ChecksumAPI/SHA256.h
 
 CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: ../ConnectionAPI/Connection.cpp
+CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: ../ConnectionAPI/Connection.h
 CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: /usr/local/opt/boost-1.73.0/include/boost/aligned_storage.hpp
 CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: /usr/local/opt/boost-1.73.0/include/boost/archive/archive_exception.hpp
 CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: /usr/local/opt/boost-1.73.0/include/boost/archive/basic_archive.hpp
@@ -1850,7 +1851,7 @@ CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection.cpp.o: /usr/local/op
 
 CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o: ../ChecksumAPI/Checksum.h
 CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o: ../ChecksumAPI/SHA256.h
-CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o: ../ConnectionAPI/Connection.cpp
+CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o: ../ConnectionAPI/Connection.h
 CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o: ../FileWatcher/FileWatcher.cpp
 CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o: ../FileWatcher/FileWatcher.h
 CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o: /usr/local/opt/boost-1.73.0/include/boost/aligned_storage.hpp
@@ -3199,7 +3200,7 @@ CMakeFiles/RemoteBackup_Client.dir/FileWatcher/FileWatcher.cpp.o: /usr/local/opt
 
 CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o: ../ChecksumAPI/Checksum.h
 CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o: ../ChecksumAPI/SHA256.h
-CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o: ../ConnectionAPI/Connection.cpp
+CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o: ../ConnectionAPI/Connection.h
 CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o: ../FileWatcher/FileWatcher.h
 CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o: ../testMain.cpp
 CMakeFiles/RemoteBackup_Client.dir/testMain.cpp.o: /usr/local/opt/boost-1.73.0/include/boost/aligned_storage.hpp

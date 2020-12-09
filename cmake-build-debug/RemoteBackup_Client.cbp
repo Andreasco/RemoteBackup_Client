@@ -97,6 +97,9 @@
 		<Unit filename="/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.cpp">
 			<Option target="RemoteBackup_Client"/>
 		</Unit>
+		<Unit filename="/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/ConnectionAPI/Connection.h">
+			<Option target="RemoteBackup_Client"/>
+		</Unit>
 		<Unit filename="/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/FileWatcher/FileWatcher.cpp">
 			<Option target="RemoteBackup_Client"/>
 		</Unit>
