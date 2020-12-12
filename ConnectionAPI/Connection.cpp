@@ -26,6 +26,12 @@ Connection::Connection(std::string ip_address, int port_number, std::string base
     }
 }
 
+/******************* DESTRUCTOR **********************************************************************************/
+
+Connection::~Connection() {
+    close_connection();
+}
+
 /******************* UTILITY METHODS ******************************************************************************/
 
 void Connection::print_percentage(float percent) {
@@ -48,9 +54,15 @@ std::string Connection::file_size_to_readable(int file_size) {
 }
 
 void Connection::close_connection(const std::shared_ptr<tcp::socket> &socket) {
-    const std::string message = "\nclose";
+    const std::string message = "close";
     send_string(socket, message);
     socket->close();
+}
+
+void Connection::close_connection() {
+    const std::string message = "close";
+    send_string(message);
+    main_socket_->close();
 }
 
 void Connection::print_string(const std::string &message) {
