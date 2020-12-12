@@ -34,6 +34,10 @@ public:
 
     Connection(std::string  ip_address, int port_number, std::string  base_path);
 
+    /******************* DESTRUCTOR **********************************************************************************/
+
+    ~Connection();
+
     /******************* UTILITY METHODS ******************************************************************************/
 
     static void print_percentage(float percent);
@@ -41,6 +45,8 @@ public:
     static std::string file_size_to_readable(int file_size);
 
     void close_connection(const std::shared_ptr<tcp::socket>& socket);
+
+    void close_connection();
 
     void print_string(const std::string& message);
 
@@ -73,7 +79,6 @@ public:
     /******************* SERIALIZATION ******************************************************************************/
 
     std::unordered_map<std::string, std::string> get_filesystem_status();
-
 };
 
 #endif
