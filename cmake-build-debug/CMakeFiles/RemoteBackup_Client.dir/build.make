@@ -161,6 +161,9 @@ RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/ConnectionAPI/Connection
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/build.make
 RemoteBackup_Client: /usr/local/opt/boost-1.73.0/lib/libboost_serialization.dylib
 RemoteBackup_Client: /usr/local/opt/boost-1.73.0/lib/libboost_filesystem.dylib
+RemoteBackup_Client: /usr/local/opt/openssl/lib/libcrypto.a
+RemoteBackup_Client: /usr/local/opt/openssl/lib/libssl.a
+RemoteBackup_Client: /usr/local/opt/openssl/lib/libcrypto.a
 RemoteBackup_Client: CMakeFiles/RemoteBackup_Client.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable RemoteBackup_Client"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/RemoteBackup_Client.dir/link.txt --verbose=$(VERBOSE)

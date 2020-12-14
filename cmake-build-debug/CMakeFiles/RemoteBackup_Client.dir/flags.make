@@ -6,5 +6,5 @@ CXX_FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sd
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/usr/local/opt/boost-1.73.0/include 
+CXX_INCLUDES = -I/usr/local/opt/boost-1.73.0/include -isystem /usr/local/opt/openssl/include 
 
