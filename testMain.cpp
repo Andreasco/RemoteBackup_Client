@@ -103,7 +103,7 @@ void readFileTest(){
 void checksumTest(){
     //std::string checksum = get_file_checksum("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
     std::string checksum = get_file_checksum("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
-    //std::cout << "File checksum: " << checksum << std::endl;
+    std::cout << "File checksum: " << checksum << std::endl;
 }
 
 void addFileTest(){
