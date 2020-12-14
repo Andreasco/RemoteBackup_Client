@@ -1,5 +1,0 @@
-/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client
--- Found OpenSSL: /usr/local/opt/openssl/lib/libcrypto.a (found version "1.1.1h")  
--- Configuring done
--- Generating done
--- Build files have been written to: /Users/andreascopp/Dropbox/CLionProjects/RemoteBackup_Client/cmake-build-debug
