@@ -6,5 +6,5 @@ CXX_FLAGS = -pthread -g   -std=gnu++17
 
 CXX_DEFINES = -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_SERIALIZATION_DYN_LINK
 
-CXX_INCLUDES = -I/usr/local/opt/boost-1.73.0/include 
+CXX_INCLUDES = -I/usr/local/opt/boost-1.73.0/include -isystem /usr/local/opt/openssl/include 
 
