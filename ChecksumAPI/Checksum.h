@@ -17,9 +17,9 @@
 
 std::string serialize_file(const std::string& file_path);
 
-std::string get_file_checksum(const std::string& file_path);
+std::string get_file_checksum_WRONG(const std::string& file_path);
 
-std::string get_file_checksum2(const char* path);
+std::string get_file_checksum(const char* path);
 
 bool checksums_equal(const std::string& checksum1, const std::string& checksum2);
 
