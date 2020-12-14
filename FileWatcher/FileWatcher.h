@@ -48,7 +48,7 @@ public:
     }
 
     void start(const std::function<void (std::string, Connection&, FileStatus)> &action);
-    void initial_check(std::unordered_map<std::string, std::string> &server, const std::function<void (std::string, Connection&, FileStatus)> &action);
+    void initial_check(const std::function<void (std::string, Connection&, FileStatus)> &action);
 
     //for tests
     std::unordered_map<std::string, std::string> get_map(){

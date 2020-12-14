@@ -7,15 +7,13 @@
 void fileWatcherTest () {
     std::cout << "Enter path to watch: ";
     std::string path_to_watch;
-    std::cin>>path_to_watch;
+    std::cin >> path_to_watch;
 
     // Create a Connection
     Connection conn_("0.0.0.0", 5004, path_to_watch);
     conn_.send_string("login guido guido.poli");
-    conn_.read_string();
+    //conn_.read_string();
 
-    FileWatcher fw_server{"/home/cbrugo/Desktop/PoliTo/PdS/Progetto/server/RemoteBackup_Server/synchronized_folders/guido", std::chrono::milliseconds(5000),
-                          conn_};
 
     if(DEBUG)
         std::cout << "[DEBUG] Filewatcher Object Initialization" << std::endl;
@@ -25,10 +23,10 @@ void fileWatcherTest () {
     if(DEBUG)
         std::cout << "[DEBUG] Filewatcher Object Initialized" << std::endl;
 
-    fw.initial_check(fw_server.paths_, [] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
+    fw.initial_check([] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
         // Process only regular files, all other file types are ignored
 
-        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path))) {
+        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path)) && status!=FileStatus::erased) {
             return;
         }
 
@@ -57,10 +55,10 @@ void fileWatcherTest () {
     // run a user provided lambda function
     fw.start([] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
         // Process only regular files, all other file types are ignored
-        /*
-        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path))) {
+
+        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path)) && status!=FileStatus::erased) {
             return;
-        }*/
+        }
 
         switch(status) {
             case FileStatus::created:
