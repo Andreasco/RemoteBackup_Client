@@ -18,16 +18,16 @@ std::string serialize_file(const std::string& file_path){
     return archive_stream.str();
 }
 
-std::string get_file_checksum2(const std::string& file_path){
+std::string get_file_checksum_WRONG(const std::string& file_path){
     std::string serialized_file = serialize_file(file_path);
     return sha256(serialized_file);
 }
 
-std::string get_file_checksum(const char* const path){
-    std::ifstream fp(path, std::ios::in | std::ios::binary);
+std::string get_file_checksum(const std::string& file_path){
+    std::ifstream fp(file_path, std::ios::in | std::ios::binary);
     if (not fp.good()) {
         std::ostringstream os;
-        os << "Cannot open \"" << path << "\": " << std::strerror(errno) << ".";
+        os << "Cannot open \"" << file_path << "\": " << std::strerror(errno) << ".";
         throw std::runtime_error(os.str());
     }
     constexpr const std::size_t buffer_size { 1 << 12 };
