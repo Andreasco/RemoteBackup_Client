@@ -340,6 +340,9 @@ void Connection::handle_read_file(std::unique_ptr<tcp::socket> socket) {
 
 std::unordered_map<std::string, std::string> Connection::get_filesystem_status() {
     send_string("checkFilesystemStatus");
+    std::cout << read_string(); // Read server confirm G.R.
+
+
     std::string serialized_data = read_string();
     std::stringstream archive_stream(serialized_data);
     boost::archive::text_iarchive archive(archive_stream);

@@ -12,6 +12,8 @@ void fileWatcherTest () {
     // Create a Connection
     Connection conn_("0.0.0.0", 5004, path_to_watch);
     conn_.send_string("login guido guido.poli");
+    std::cout << conn_.read_string(); // Read server confirm G.R.
+
     //conn_.read_string();
 
 
@@ -145,11 +147,13 @@ void getFilesystemStatusTest(){
     std::getline(std::cin, input);
     if (input == "y") {
         s.send_string("login guido guido.poli");
+        std::cout << s.read_string(); // Read server confirm G.R.
 
         std::cout << "Do you want to get the filesystem status now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
             std::unordered_map<std::string, std::string> m = s.get_filesystem_status();
+
 
             // Print the filesystem
             std::for_each(m.begin(),
