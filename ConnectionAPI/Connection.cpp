@@ -161,6 +161,13 @@ void Connection::remove_file(const std::string &file_path) {
     oss << "\n";
     send_string(oss.str());
 
+    //FIXME si blocca nel caso in cui il server crashi e non mandi nulla, cercare soluzione su SO
+    std::string response = read_string();
+    if(response.find("[SERVER SUCCESS]") == std::string::npos){ // The response
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        remove_file(file_path);
+    }
+
     // Read the confirm of receipt from the server
     print_string(read_string());
 }

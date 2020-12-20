@@ -145,11 +145,13 @@ void getFilesystemStatusTest(){
     std::getline(std::cin, input);
     if (input == "y") {
         s.send_string("login guido guido.poli");
+        std::cout << "[DEBUG] Server response: " << s.read_string() << std::endl;
 
         std::cout << "Do you want to get the filesystem status now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
             std::unordered_map<std::string, std::string> m = s.get_filesystem_status();
+            std::cout << "[DEBUG] Server response: " << s.read_string() << std::endl;
 
             // Print the filesystem
             std::for_each(m.begin(),
