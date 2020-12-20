@@ -207,6 +207,15 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     oss << file_size;
     send_string(oss.str());
 
+    /*//FIXME si blocca nel caso in cui il server crashi e non mandi nulla, cercare soluzione su SO
+    std::string response = read_string();
+    if(response.find("[SERVER SUCCESS]") == std::string::npos){ // The response
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        handle_send_file(file_path, command);
+    }*/
+
+    std::cout << read_string() << std::endl; // Read server's response
+
     do_send_file(std::move(source_file));
 
     // Read the confirm of receipt from the server
@@ -347,6 +356,8 @@ void Connection::handle_read_file(std::unique_ptr<tcp::socket> socket) {
 
 std::unordered_map<std::string, std::string> Connection::get_filesystem_status() {
     send_string("checkFilesystemStatus");
+    std::cout << read_string(); // Read server's response
+
     std::string serialized_data = read_string();
     std::stringstream archive_stream(serialized_data);
     boost::archive::text_iarchive archive(archive_stream);
