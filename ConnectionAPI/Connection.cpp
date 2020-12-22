@@ -187,10 +187,16 @@ void Connection::remove_file(const std::string &file_path) {
     oss << "\n";
     send_string(oss.str());
 
-    //FIXME si blocca nel caso in cui il server crashi e non mandi nulla, cercare soluzione su SO
-    std::string response = read_string();
+    /*//IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
+    // Read the confirm of command receipt from the server
+    print_string(read_string());*/
+
+    std::string response = read_string_with_deadline(3);
     if(response == "-1" || response.find("[SERVER SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
-        std::this_thread::sleep_for(std::chrono::seconds(5));
+        //std::this_thread::sleep_for(std::chrono::seconds(5));
+        if(DEBUG) {
+            std::cout << "[DEBUG] Server error or no confirmation received" << std::endl;
+        }
         remove_file(file_path);
     }
 
@@ -240,7 +246,9 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     std::string response = read_string_with_deadline(3);
     if(response == "-1" || response.find("[SERVER SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
         //std::this_thread::sleep_for(std::chrono::seconds(5));
-        std::cout << "TIMERRRRRRR" << std::endl;
+        if(DEBUG) {
+            std::cout << "[DEBUG] Server error or no confirmation received" << std::endl;
+        }
         //handle_send_file(file_path, command);
     }
 
