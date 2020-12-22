@@ -79,22 +79,18 @@ void fileWatcherTest () {
 }
 
 void sendStringTest(){
-    Connection s("0.0.0.0", 5007, "/Users/andreascopp/Desktop/Client-TestFiles/");
-    std::cout << s.read_string(); //Leggo quello che mi arriva appena instauro la connessione
+    Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles/");
+    std::cout << s.read_string();
     std::string message;
     while(message != "stop") {
         std::getline(std::cin, message);
         s.send_string(message);
         std::cout << s.read_string();
     }
-
-    //Per usare il metodo prova col server di prova
-    /*Connection s;
-    s.prova("0.0.0.0", 1234);*/
 }
 
 void readFileTest(){
-    Connection s("0.0.0.0", 1234, "/Users/andreascopp/Desktop/Client-TestFiles/");
+    Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::string input;
     s.read_file();
 }
@@ -109,14 +105,12 @@ void addFileTest(){
     std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
     Connection s("0.0.0.0", 5004, base_path_);
 
-    //std::cout << s.read_string() << std::endl;
-
     std::string input;
-    std::cout << "Do you want login now?(y/n): ";
+    std::cout << "Do you want to login now?(y/n): ";
     std::getline(std::cin, input);
     if (input == "y") {
         s.send_string("login guido guido.poli");
-        std::cout << s.read_string(); // Read server confirm G.R.
+        std::cout << s.read_string(); // Read server confirm
 
         std::cout << "Do you want to send the file now?(y/n): ";
         std::getline(std::cin, input);
@@ -125,7 +119,7 @@ void addFileTest(){
             //s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client2.txt");
 
             // In order to wait the sending of the files, since they are made by different threads
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            //std::this_thread::sleep_for(std::chrono::seconds(5));
             s.send_string("close");
         }
         else if (input == "n"){
@@ -138,14 +132,12 @@ void getFilesystemStatusTest(){
     std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
     Connection s("0.0.0.0", 5004, base_path_);
 
-    //std::cout << s.read_string() << std::endl;
-
     std::string input;
-    std::cout << "Do you want login now?(y/n): ";
+    std::cout << "Do you want to login now?(y/n): ";
     std::getline(std::cin, input);
     if (input == "y") {
         s.send_string("login guido guido.poli");
-        std::cout << s.read_string(); // Read server confirm G.R.
+        std::cout << s.read_string(); // Read server confirm
 
         std::cout << "Do you want to get the filesystem status now?(y/n): ";
         std::getline(std::cin, input);
@@ -159,8 +151,6 @@ void getFilesystemStatusTest(){
                               std::cout << "{" << p.first << ": " << p.second << "}\n";
                           });
 
-            // In order to wait the sending of the files, since they are made by different threads
-            std::this_thread::sleep_for(std::chrono::seconds(5));
             s.send_string("close");
         }
         else if (input == "n"){

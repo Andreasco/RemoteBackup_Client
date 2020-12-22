@@ -8,7 +8,7 @@
 
 //TODO Gestire gli errori della creazione del main_socket_
 Connection::Connection(std::string ip_address, int port_number, std::string base_path):
-        io_context_(), pool_(2), server_ip_address_(std::move(ip_address)), server_port_number_(port_number), base_path_(std::move(base_path)) {
+    io_context_(), read_timer_(io_context_), pool_(2), server_ip_address_(std::move(ip_address)), server_port_number_(port_number), base_path_(std::move(base_path)), reading(false), closed(false) {
     try {
         main_socket_ = std::make_unique<tcp::socket>(io_context_); //Prova per cercare di inizializzare il socket_ DOPO io_context_
         main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
@@ -29,7 +29,9 @@ Connection::Connection(std::string ip_address, int port_number, std::string base
 /******************* DESTRUCTOR **********************************************************************************/
 
 Connection::~Connection() {
-    close_connection();
+    if(!closed) {
+        close_connection();
+    }
 }
 
 /******************* UTILITY METHODS ******************************************************************************/
@@ -54,15 +56,18 @@ std::string Connection::file_size_to_readable(int file_size) {
 }
 
 void Connection::close_connection(const std::shared_ptr<tcp::socket> &socket) {
-    const std::string message = "close";
-    send_string(socket, message);
-    socket->close();
+    handle_close_connection(socket);
 }
 
 void Connection::close_connection() {
+    handle_close_connection(main_socket_);
+}
+
+void Connection::handle_close_connection(const std::shared_ptr<tcp::socket> &socket){
     const std::string message = "close";
     send_string(message);
-    main_socket_->close();
+    socket->close();
+    closed = true;
 }
 
 void Connection::print_string(const std::string &message) {
@@ -73,25 +78,14 @@ void Connection::print_string(const std::string &message) {
 /******************* STRINGS METHODS ******************************************************************************/
 
 std::string Connection::read_string() {
-    boost::system::error_code error;
-    boost::asio::streambuf buf;
-    boost::asio::read_until(*main_socket_, buf, "\n", error);
-    if(!error) {
-        if(DEBUG) {
-            //std::cout << "[DEBUG] Receive succeded" << std::endl;
-            print_string("[DEBUG] Receive succeded");
-        }
-        std::string data = boost::asio::buffer_cast<const char*>(buf.data());
-        return data;
-    }
-    else {
-        //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
-        print_string("[ERROR] Receive failed: " + error.message());
-    }
-    return nullptr; //TODO questo va cambiato
+    return handle_read_string(main_socket_);
 }
 
 std::string Connection::read_string(const std::shared_ptr<tcp::socket> &socket) {
+    return handle_read_string(socket);
+}
+
+std::string Connection::handle_read_string(const std::shared_ptr<tcp::socket> &socket) {
     boost::system::error_code error;
     boost::asio::streambuf buf;
     boost::asio::read_until(*socket, buf, "\n", error);
@@ -107,30 +101,62 @@ std::string Connection::read_string(const std::shared_ptr<tcp::socket> &socket) 
         //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
         print_string("[ERROR] Receive failed: " + error.message());
     }
-    return nullptr; //TODO questo va cambiato
+    return "-1";
 }
 
-void Connection::send_string(const std::string &message) {
-    if(DEBUG) {
-        //std::cout << "[DEBUG] Sending string: " << message << std::endl;
-        print_string("[DEBUG] Sending string: " + message);
-    }
-    const std::string msg = message + "\n";
-    boost::system::error_code error;
-    boost::asio::write(*main_socket_, boost::asio::buffer(msg), error);
-    if(!error) {
-        if(DEBUG) {
-            //std::cout << "[DEBUG] Client sent: " << message << std::endl;
-            print_string("[DEBUG] Client sent: " + message);
+std::string Connection::read_string_with_deadline(int deadline_seconds) {
+    boost::asio::streambuf buf;
+    boost::asio::async_read_until(*main_socket_, buf, "\n", [this](boost::system::error_code error, std::size_t bytes_read) -> std::string{
+        reading = true;
+        read_timer_.cancel(); // Cancel the timer because I started reading
+
+        boost::asio::streambuf buf;
+        if(!error) {
+            if(DEBUG) {
+                //std::cout << "[DEBUG] Receive succeded" << std::endl;
+                print_string("[DEBUG] Receive succeded");
+            }
+
+            std::string data = boost::asio::buffer_cast<const char*>(buf.data());
+            return data;
+        }
+        else {
+            //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
+            print_string("[ERROR] Receive failed: " + error.message());
+        }
+        return "-1";
+    });
+
+    boost::system::error_code err;
+    read_timer_.expires_from_now(boost::posix_time::seconds(deadline_seconds));
+    read_timer_.wait(err);
+    if(!err) {
+        if(!reading) {
+            if (DEBUG) {
+                print_string("[DEBUG] Read timeout occurred");
+            }
+
+            main_socket_->cancel();
+            return "-1";
         }
     }
     else {
-        //std::cout << __FUNCTION__ << "[ERROR] Send failed: " << error.message() << std::endl;
-        print_string("[ERROR] In function: " + std::string(__FUNCTION__) + " Send failed: " + error.message());
+        //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
+        print_string("[ERROR] Timer error: " + err.message());
     }
+
+    reading = false; // In this way I don't risk that the main thread get stuck for some reason on line 135 when reading = true and resume his workflow after the end of the reading thread where I should set reading = false;
+}
+
+void Connection::send_string(const std::string &message) {
+    handle_send_string(main_socket_, message);
 }
 
 void Connection::send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message) {
+    handle_send_string(socket, message);
+}
+
+void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message) {
     if(DEBUG) {
         //std::cout << "[DEBUG] Sending string: " << message << std::endl;
         print_string("[DEBUG] Sending string: " + message);
@@ -163,7 +189,7 @@ void Connection::remove_file(const std::string &file_path) {
 
     //FIXME si blocca nel caso in cui il server crashi e non mandi nulla, cercare soluzione su SO
     std::string response = read_string();
-    if(response.find("[SERVER SUCCESS]") == std::string::npos){ // The response
+    if(response == "-1" || response.find("[SERVER SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
         std::this_thread::sleep_for(std::chrono::seconds(5));
         remove_file(file_path);
     }
@@ -207,18 +233,20 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     oss << file_size;
     send_string(oss.str());
 
-    /*//FIXME si blocca nel caso in cui il server crashi e non mandi nulla, cercare soluzione su SO
-    std::string response = read_string();
-    if(response.find("[SERVER SUCCESS]") == std::string::npos){ // The response
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-        handle_send_file(file_path, command);
-    }*/
+    /*//IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
+    // Read the confirm of command receipt from the server
+    print_string(read_string());*/
 
-    std::cout << read_string() << std::endl; // Read server's response
+    std::string response = read_string_with_deadline(3);
+    if(response == "-1" || response.find("[SERVER SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
+        //std::this_thread::sleep_for(std::chrono::seconds(5));
+        std::cout << "TIMERRRRRRR" << std::endl;
+        //handle_send_file(file_path, command);
+    }
 
     do_send_file(std::move(source_file));
 
-    // Read the confirm of receipt from the server
+    // Read the confirm of file receipt from the server
     print_string(read_string());
 
     //std::cout << "\n" << "[INFO] File " << file_path << " sent successfully!" << std::endl;
@@ -240,7 +268,7 @@ void Connection::do_send_file(std::ifstream source_file) {
 
     long bytes_sent = 0;
     float percent = 0;
-    //print_percentage(percent);
+    print_percentage(percent);
 
     while(!source_file.eof()) {
         source_file.read(buf.c_array(), (std::streamsize)buf.size());
