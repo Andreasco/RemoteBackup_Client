@@ -39,7 +39,7 @@ void FileWatcher::start(const std::function<void (std::string, Connection&, File
                 // File modification
             } else {
                 //std::cout << "not new" <<std::endl;
-                if(checksums_equal(paths_[relative(file.path().string())], current_file_checksum)) {
+                if(!checksums_equal(paths_[relative(file.path().string())], current_file_checksum)) {
                     paths_[relative(file.path().string())] = current_file_checksum;
                     action(file.path().string(), conn_, FileStatus::modified);
                 }
