@@ -54,7 +54,7 @@ void sendStringTest(){
 void readFileTest(){
     Connection s("0.0.0.0", 1234, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::string input;
-    s.read_file();
+    s.get_file();
 }
 
 void checksum(){

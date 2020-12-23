@@ -346,6 +346,7 @@ public:
         });
     }
 
+    //N.B: passo il socket in maniera diversa qua ed handle_send_file
     void handle_read_file(std::unique_ptr<tcp::socket> socket) {
         boost::array<char, 1024> buf{};
 
