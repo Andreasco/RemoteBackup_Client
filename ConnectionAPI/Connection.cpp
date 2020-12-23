@@ -244,7 +244,7 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     print_string(read_string());*/
 
     std::string response = read_string_with_deadline(3);
-    if(response == "-1" || response.find("[SERVER SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
+    if(response == "-1" || response.find("[SERVER_SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
         //std::this_thread::sleep_for(std::chrono::seconds(5));
         if(DEBUG) {
             std::cout << "[DEBUG] Server error or no confirmation received" << std::endl;
@@ -313,15 +313,11 @@ void Connection::do_send_file(std::ifstream source_file) {
 }
 
 //TODO Rifinire e rendere asincrono
-void Connection::read_file() {
-    boost::asio::post(pool_, [this] {
-        std::unique_ptr<tcp::socket> socket = std::make_unique<tcp::socket>(io_context_);
-
-        handle_read_file(std::move(socket));
-    });
+void Connection::get_file(const std::string &file_path) {
+    handle_get_file(file_path);
 }
 
-void Connection::handle_read_file(std::unique_ptr<tcp::socket> socket) {
+void Connection::handle_get_file(const std::string &file_path) {
     boost::array<char, 1024> buf{};
 
     // Probabilmente il try non serve
@@ -329,8 +325,8 @@ void Connection::handle_read_file(std::unique_ptr<tcp::socket> socket) {
         boost::system::error_code error;
         boost::asio::streambuf request_buf;
 
-        // Read the request saying file name and file size
-        boost::asio::read_until(*socket, request_buf, "\n\n");
+        /*// Read the request saying file name and file size
+        boost::asio::read_until(*main_socket_, request_buf, "\n\n");
         if(DEBUG) {
             std::cout << "[DEBUG] Request size:" << request_buf.size() << "\n";
         }
@@ -340,25 +336,33 @@ void Connection::handle_read_file(std::unique_ptr<tcp::socket> socket) {
 
         request_stream >> file_path;
         request_stream >> file_size;
-        request_stream.read(buf.c_array(), 2); // eat the "\n\n" //TODO capire a cosa serva
+        request_stream.read(buf.c_array(), 2); // eat the "\n\n" //TODO capire a cosa serva*/
+
+        std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
 
         if(DEBUG) {
-            std::cout << "[DEBUG] " << file_path << " size is: " << file_size << std::endl;
+            print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
         }
 
-        size_t pos = file_path.find_last_of('/'); //FIXME character may depend on the OS
-        if (pos!=std::string::npos) {
-            std::string file_name = file_path.substr(pos + 1);
+        // Send the command to ask the file
+        std::ostringstream oss;
+        oss <<  "getFile ";
+        oss << cleaned_file_path;
+        send_string(oss.str());
 
-            file_path = base_path_ + file_name;
-        }
-        std::ofstream output_file(file_path.c_str(), std::ios_base::binary);
-        if (!output_file){
-            std::cout << "[ERROR] Failed to open " << file_path << std::endl;
-            //TODO gestire errore
+        // Receive file size
+        std::string response = read_string();
+        int pos = response.find(' ');
+        int file_size = std::stoi(response.substr(pos, response.length()));
+
+        if(DEBUG) {
+            std::ostringstream oss2;
+            oss2 << "[DEBUG] File size: ";
+            oss2 << file_size;
+            print_string(oss2.str());
         }
 
-        // write extra bytes to file
+        /*// write extra bytes to file
         //TODO why?
         do {
             request_stream.read(buf.c_array(), (std::streamsize)buf.size());
@@ -366,10 +370,17 @@ void Connection::handle_read_file(std::unique_ptr<tcp::socket> socket) {
                 std::cout << "[DEBUG] " << __FUNCTION__ << " wrote " << request_stream.gcount() << " bytes" << std::endl;
             }
             output_file.write(buf.c_array(), request_stream.gcount());
-        } while (request_stream.gcount()>0);
+        } while (request_stream.gcount()>0);*/
+
+        // Open the file to save
+        std::ofstream output_file(file_path, std::ios_base::binary);
+        if (!output_file){
+            std::cout << "[ERROR] Failed to open " << file_path << std::endl;
+            //TODO gestire errore
+        }
 
         for(;;) {
-            size_t len = socket->read_some(boost::asio::buffer(buf), error);
+            size_t len = main_socket_->read_some(boost::asio::buffer(buf), error);
             if (len>0)
                 output_file.write(buf.c_array(), (std::streamsize)len);
             if (output_file.tellp() == (std::fstream::pos_type)(std::streamsize)file_size)

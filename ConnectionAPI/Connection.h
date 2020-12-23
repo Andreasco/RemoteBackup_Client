@@ -84,9 +84,9 @@ public:
 
     void do_send_file(std::ifstream source_file);
 
-    void read_file();
+    void get_file(const std::string &file_path);
 
-    void handle_read_file(std::unique_ptr<tcp::socket> socket);
+    void handle_get_file(const std::string &file_path);
 
     /******************* SERIALIZATION ******************************************************************************/
 
