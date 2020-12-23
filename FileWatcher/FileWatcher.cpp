@@ -51,8 +51,8 @@ void FileWatcher::start(const std::function<void (std::string, Connection&, File
 
 void FileWatcher::initial_check(const std::function<void (std::string, Connection&, FileStatus)> &action){
 
-    //std::unordered_map<std::string, std::string> server = conn_.get_filesystem_status();
-    std::unordered_map<std::string, std::string> server = std::unordered_map<std::string, std::string>();
+    std::unordered_map<std::string, std::string> server = conn_.get_filesystem_status();
+    //std::unordered_map<std::string, std::string> server = std::unordered_map<std::string, std::string>();
     if(DEBUG)
         std::cout << "[DEBUG] [FileWatcher] FileSystemStatus received" << std::endl;
     //Copy directories server -> client
