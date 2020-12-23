@@ -55,12 +55,12 @@ std::string Connection::file_size_to_readable(int file_size) {
     return std::to_string(new_file_size) + " " + measures[i];
 }
 
-void Connection::close_connection(const std::shared_ptr<tcp::socket> &socket) {
-    handle_close_connection(socket);
-}
-
 void Connection::close_connection() {
     handle_close_connection(main_socket_);
+}
+
+void Connection::close_connection(const std::shared_ptr<tcp::socket> &socket) {
+    handle_close_connection(socket);
 }
 
 void Connection::handle_close_connection(const std::shared_ptr<tcp::socket> &socket){
@@ -90,11 +90,13 @@ std::string Connection::handle_read_string(const std::shared_ptr<tcp::socket> &s
     boost::asio::streambuf buf;
     boost::asio::read_until(*socket, buf, "\n", error);
     if(!error) {
+        std::string data = boost::asio::buffer_cast<const char*>(buf.data());
+
         if(DEBUG) {
             //std::cout << "[DEBUG] Receive succeded" << std::endl;
-            print_string("[DEBUG] Receive succeded");
+            print_string("[DEBUG] Client received: " + data);
         }
-        std::string data = boost::asio::buffer_cast<const char*>(buf.data());
+
         return data;
     }
     else {
@@ -312,12 +314,7 @@ void Connection::do_send_file(std::ifstream source_file) {
     source_file.close();
 }
 
-//TODO Rifinire e rendere asincrono
 void Connection::get_file(const std::string &file_path) {
-    handle_get_file(file_path);
-}
-
-void Connection::handle_get_file(const std::string &file_path) {
     boost::array<char, 1024> buf{};
 
     // Probabilmente il try non serve
@@ -325,26 +322,13 @@ void Connection::handle_get_file(const std::string &file_path) {
         boost::system::error_code error;
         boost::asio::streambuf request_buf;
 
-        /*// Read the request saying file name and file size
-        boost::asio::read_until(*main_socket_, request_buf, "\n\n");
-        if(DEBUG) {
-            std::cout << "[DEBUG] Request size:" << request_buf.size() << "\n";
-        }
-        std::istream request_stream(&request_buf);
-        std::string file_path;
-        size_t file_size = 0;
-
-        request_stream >> file_path;
-        request_stream >> file_size;
-        request_stream.read(buf.c_array(), 2); // eat the "\n\n" //TODO capire a cosa serva*/
-
         std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
 
         if(DEBUG) {
             print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
         }
 
-        // Send the command to ask the file
+        // Send the command to request the file
         std::ostringstream oss;
         oss <<  "getFile ";
         oss << cleaned_file_path;
@@ -355,22 +339,16 @@ void Connection::handle_get_file(const std::string &file_path) {
         int pos = response.find(' ');
         int file_size = std::stoi(response.substr(pos, response.length()));
 
+        // Send confirm to the server
+        send_string("[CLIENT_SUCCESS] File size received");
+
         if(DEBUG) {
             std::ostringstream oss2;
             oss2 << "[DEBUG] File size: ";
             oss2 << file_size;
+            oss2 << " bytes";
             print_string(oss2.str());
         }
-
-        /*// write extra bytes to file
-        //TODO why?
-        do {
-            request_stream.read(buf.c_array(), (std::streamsize)buf.size());
-            if(DEBUG) {
-                std::cout << "[DEBUG] " << __FUNCTION__ << " wrote " << request_stream.gcount() << " bytes" << std::endl;
-            }
-            output_file.write(buf.c_array(), request_stream.gcount());
-        } while (request_stream.gcount()>0);*/
 
         // Open the file to save
         std::ofstream output_file(file_path, std::ios_base::binary);

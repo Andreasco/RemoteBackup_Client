@@ -86,8 +86,6 @@ public:
 
     void get_file(const std::string &file_path);
 
-    void handle_get_file(const std::string &file_path);
-
     /******************* SERIALIZATION ******************************************************************************/
 
     std::unordered_map<std::string, std::string> get_filesystem_status();

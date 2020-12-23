@@ -98,12 +98,12 @@ void readFileTest(){
         s.send_string("login guido guido.poli");
         std::cout << s.read_string(); // Read server confirm
 
-        std::cout << "Do you want to send the file now?(y/n): ";
+        std::cout << "Do you want to read the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
-            s.get_file("/Users/andreascopp/Desktop/Client-TestFiles/account.png");
+            s.get_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
 
-            s.send_string("close");
+            s.close_connection();
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
@@ -136,7 +136,7 @@ void addFileTest(){
 
             // In order to wait the sending of the files, since they are made by different threads
             //std::this_thread::sleep_for(std::chrono::seconds(5));
-            s.send_string("close");
+            s.close_connection();
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
@@ -167,7 +167,7 @@ void getFilesystemStatusTest(){
                               std::cout << "{" << p.first << ": " << p.second << "}\n";
                           });
 
-            s.send_string("close");
+            s.close_connection();
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
