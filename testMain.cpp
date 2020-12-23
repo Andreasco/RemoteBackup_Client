@@ -92,7 +92,23 @@ void sendStringTest(){
 void readFileTest(){
     Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::string input;
-    s.get_file();
+    std::cout << "Do you want to login now?(y/n): ";
+    std::getline(std::cin, input);
+    if (input == "y") {
+        s.send_string("login guido guido.poli");
+        std::cout << s.read_string(); // Read server confirm
+
+        std::cout << "Do you want to send the file now?(y/n): ";
+        std::getline(std::cin, input);
+        if (input == "y") {
+            s.get_file("/Users/andreascopp/Desktop/Client-TestFiles/account.png");
+
+            s.send_string("close");
+        }
+        else if (input == "n"){
+            std::cout << "Ok bye!" << std::endl;
+        }
+    }
 }
 
 void checksumTest(){
