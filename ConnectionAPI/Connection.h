@@ -20,12 +20,16 @@ using boost::asio::ip::tcp;
 class Connection {
 private:
     boost::asio::io_context io_context_;
-    std::unique_ptr<tcp::socket> main_socket_;
+    std::shared_ptr<tcp::socket> main_socket_;
     boost::asio::thread_pool pool_;
 
     std::string base_path_;
     std::string server_ip_address_;
     int server_port_number_;
+
+    boost::asio::deadline_timer read_timer_;
+    bool reading;
+    bool closed;
 
     std::mutex mutex_;
 
@@ -48,6 +52,8 @@ public:
 
     void close_connection();
 
+    void handle_close_connection(const std::shared_ptr<tcp::socket> &socket);
+
     void print_string(const std::string& message);
 
     /******************* STRINGS METHODS ******************************************************************************/
@@ -56,9 +62,15 @@ public:
 
     std::string read_string(const std::shared_ptr<tcp::socket>& socket);
 
+    std::string handle_read_string(const std::shared_ptr<tcp::socket> &socket);
+
+    std::string read_string_with_deadline(int deadline_seconds);
+
     void send_string(const std::string& message);
 
     void send_string(const std::shared_ptr<tcp::socket>& socket, const std::string& message);
+
+    void handle_send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message);
 
     /******************* FILES METHODS ******************************************************************************/
 
@@ -72,9 +84,7 @@ public:
 
     void do_send_file(std::ifstream source_file);
 
-    void read_file();
-
-    void handle_read_file(std::unique_ptr<tcp::socket> socket);
+    void get_file(const std::string &file_path);
 
     /******************* SERIALIZATION ******************************************************************************/
 

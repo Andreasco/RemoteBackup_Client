@@ -8,7 +8,7 @@
 
 //TODO Gestire gli errori della creazione del main_socket_
 Connection::Connection(std::string ip_address, int port_number, std::string base_path):
-        io_context_(), pool_(2), server_ip_address_(std::move(ip_address)), server_port_number_(port_number), base_path_(std::move(base_path)) {
+    io_context_(), read_timer_(io_context_), pool_(2), server_ip_address_(std::move(ip_address)), server_port_number_(port_number), base_path_(std::move(base_path)), reading(false), closed(false) {
     try {
         main_socket_ = std::make_unique<tcp::socket>(io_context_); //Prova per cercare di inizializzare il socket_ DOPO io_context_
         main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
@@ -29,7 +29,9 @@ Connection::Connection(std::string ip_address, int port_number, std::string base
 /******************* DESTRUCTOR **********************************************************************************/
 
 Connection::~Connection() {
-    close_connection();
+    if(!closed) {
+        close_connection();
+    }
 }
 
 /******************* UTILITY METHODS ******************************************************************************/
@@ -53,16 +55,19 @@ std::string Connection::file_size_to_readable(int file_size) {
     return std::to_string(new_file_size) + " " + measures[i];
 }
 
-void Connection::close_connection(const std::shared_ptr<tcp::socket> &socket) {
-    const std::string message = "close";
-    send_string(socket, message);
-    socket->close();
+void Connection::close_connection() {
+    handle_close_connection(main_socket_);
 }
 
-void Connection::close_connection() {
+void Connection::close_connection(const std::shared_ptr<tcp::socket> &socket) {
+    handle_close_connection(socket);
+}
+
+void Connection::handle_close_connection(const std::shared_ptr<tcp::socket> &socket){
     const std::string message = "close";
     send_string(message);
-    main_socket_->close();
+    socket->close();
+    closed = true;
 }
 
 void Connection::print_string(const std::string &message) {
@@ -73,64 +78,87 @@ void Connection::print_string(const std::string &message) {
 /******************* STRINGS METHODS ******************************************************************************/
 
 std::string Connection::read_string() {
-    boost::system::error_code error;
-    boost::asio::streambuf buf;
-    boost::asio::read_until(*main_socket_, buf, "\n", error);
-    if(!error) {
-        if(DEBUG) {
-            //std::cout << "[DEBUG] Receive succeded" << std::endl;
-            print_string("[DEBUG] Receive succeded");
-        }
-        std::string data = boost::asio::buffer_cast<const char*>(buf.data());
-        return data;
-    }
-    else {
-        //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
-        print_string("[ERROR] Receive failed: " + error.message());
-    }
-    return nullptr; //TODO questo va cambiato
+    return handle_read_string(main_socket_);
 }
 
 std::string Connection::read_string(const std::shared_ptr<tcp::socket> &socket) {
+    return handle_read_string(socket);
+}
+
+std::string Connection::handle_read_string(const std::shared_ptr<tcp::socket> &socket) {
     boost::system::error_code error;
     boost::asio::streambuf buf;
     boost::asio::read_until(*socket, buf, "\n", error);
     if(!error) {
+        std::string data = boost::asio::buffer_cast<const char*>(buf.data());
+
         if(DEBUG) {
             //std::cout << "[DEBUG] Receive succeded" << std::endl;
-            print_string("[DEBUG] Receive succeded");
+            print_string("[DEBUG] Client received: " + data);
         }
-        std::string data = boost::asio::buffer_cast<const char*>(buf.data());
+
         return data;
     }
     else {
         //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
         print_string("[ERROR] Receive failed: " + error.message());
     }
-    return nullptr; //TODO questo va cambiato
+    return "-1";
 }
 
-void Connection::send_string(const std::string &message) {
-    if(DEBUG) {
-        //std::cout << "[DEBUG] Sending string: " << message << std::endl;
-        print_string("[DEBUG] Sending string: " + message);
-    }
-    const std::string msg = message + "\n";
-    boost::system::error_code error;
-    boost::asio::write(*main_socket_, boost::asio::buffer(msg), error);
-    if(!error) {
-        if(DEBUG) {
-            //std::cout << "[DEBUG] Client sent: " << message << std::endl;
-            print_string("[DEBUG] Client sent: " + message);
+std::string Connection::read_string_with_deadline(int deadline_seconds) {
+    boost::asio::streambuf buf;
+    boost::asio::async_read_until(*main_socket_, buf, "\n", [this](boost::system::error_code error, std::size_t bytes_read) -> std::string{
+        reading = true;
+        read_timer_.cancel(); // Cancel the timer because I started reading
+
+        boost::asio::streambuf buf;
+        if(!error) {
+            if(DEBUG) {
+                //std::cout << "[DEBUG] Receive succeded" << std::endl;
+                print_string("[DEBUG] Receive succeded");
+            }
+
+            std::string data = boost::asio::buffer_cast<const char*>(buf.data());
+            return data;
+        }
+        else {
+            //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
+            print_string("[ERROR] Receive failed: " + error.message());
+        }
+        return "-1";
+    });
+
+    boost::system::error_code err;
+    read_timer_.expires_from_now(boost::posix_time::seconds(deadline_seconds));
+    read_timer_.wait(err);
+    if(!err) {
+        if(!reading) {
+            if (DEBUG) {
+                print_string("[DEBUG] Read timeout occurred");
+            }
+
+            main_socket_->cancel();
+            return "-1";
         }
     }
     else {
-        //std::cout << __FUNCTION__ << "[ERROR] Send failed: " << error.message() << std::endl;
-        print_string("[ERROR] In function: " + std::string(__FUNCTION__) + " Send failed: " + error.message());
+        //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
+        print_string("[ERROR] Timer error: " + err.message());
     }
+
+    reading = false; // In this way I don't risk that the main thread get stuck for some reason on line 135 when reading = true and resume his workflow after the end of the reading thread where I should set reading = false;
+}
+
+void Connection::send_string(const std::string &message) {
+    handle_send_string(main_socket_, message);
 }
 
 void Connection::send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message) {
+    handle_send_string(socket, message);
+}
+
+void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message) {
     if(DEBUG) {
         //std::cout << "[DEBUG] Sending string: " << message << std::endl;
         print_string("[DEBUG] Sending string: " + message);
@@ -160,6 +188,19 @@ void Connection::remove_file(const std::string &file_path) {
     oss << cleaned_file_path;
     oss << "\n";
     send_string(oss.str());
+
+    /*//IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
+    // Read the confirm of command receipt from the server
+    print_string(read_string());*/
+
+    std::string response = read_string_with_deadline(3);
+    if(response == "-1" || response.find("[SERVER SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
+        //std::this_thread::sleep_for(std::chrono::seconds(5));
+        if(DEBUG) {
+            std::cout << "[DEBUG] Server error or no confirmation received" << std::endl;
+        }
+        remove_file(file_path);
+    }
 
     // Read the confirm of receipt from the server
     print_string(read_string());
@@ -200,9 +241,22 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     oss << file_size;
     send_string(oss.str());
 
+    /*//IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
+    // Read the confirm of command receipt from the server
+    print_string(read_string());*/
+
+    std::string response = read_string_with_deadline(3);
+    if(response == "-1" || response.find("[SERVER_SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
+        //std::this_thread::sleep_for(std::chrono::seconds(5));
+        if(DEBUG) {
+            std::cout << "[DEBUG] Server error or no confirmation received" << std::endl;
+        }
+        //handle_send_file(file_path, command);
+    }
+
     do_send_file(std::move(source_file));
 
-    // Read the confirm of receipt from the server
+    // Read the confirm of file receipt from the server
     print_string(read_string());
 
     //std::cout << "\n" << "[INFO] File " << file_path << " sent successfully!" << std::endl;
@@ -224,7 +278,7 @@ void Connection::do_send_file(std::ifstream source_file) {
 
     long bytes_sent = 0;
     float percent = 0;
-    //print_percentage(percent);
+    print_percentage(percent);
 
     while(!source_file.eof()) {
         source_file.read(buf.c_array(), (std::streamsize)buf.size());
@@ -260,16 +314,7 @@ void Connection::do_send_file(std::ifstream source_file) {
     source_file.close();
 }
 
-//TODO Rifinire e rendere asincrono
-void Connection::read_file() {
-    boost::asio::post(pool_, [this] {
-        std::unique_ptr<tcp::socket> socket = std::make_unique<tcp::socket>(io_context_);
-
-        handle_read_file(std::move(socket));
-    });
-}
-
-void Connection::handle_read_file(std::unique_ptr<tcp::socket> socket) {
+void Connection::get_file(const std::string &file_path) {
     boost::array<char, 1024> buf{};
 
     // Probabilmente il try non serve
@@ -277,47 +322,43 @@ void Connection::handle_read_file(std::unique_ptr<tcp::socket> socket) {
         boost::system::error_code error;
         boost::asio::streambuf request_buf;
 
-        // Read the request saying file name and file size
-        boost::asio::read_until(*socket, request_buf, "\n\n");
-        if(DEBUG) {
-            std::cout << "[DEBUG] Request size:" << request_buf.size() << "\n";
-        }
-        std::istream request_stream(&request_buf);
-        std::string file_path;
-        size_t file_size = 0;
-
-        request_stream >> file_path;
-        request_stream >> file_size;
-        request_stream.read(buf.c_array(), 2); // eat the "\n\n" //TODO capire a cosa serva
+        std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
 
         if(DEBUG) {
-            std::cout << "[DEBUG] " << file_path << " size is: " << file_size << std::endl;
+            print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
         }
 
-        size_t pos = file_path.find_last_of('/'); //FIXME character may depend on the OS
-        if (pos!=std::string::npos) {
-            std::string file_name = file_path.substr(pos + 1);
+        // Send the command to request the file
+        std::ostringstream oss;
+        oss <<  "getFile ";
+        oss << cleaned_file_path;
+        send_string(oss.str());
 
-            file_path = base_path_ + file_name;
+        // Receive file size
+        std::string response = read_string();
+        int pos = response.find(' ');
+        int file_size = std::stoi(response.substr(pos, response.length()));
+
+        // Send confirm to the server
+        send_string("[CLIENT_SUCCESS] File size received");
+
+        if(DEBUG) {
+            std::ostringstream oss2;
+            oss2 << "[DEBUG] File size: ";
+            oss2 << file_size;
+            oss2 << " bytes";
+            print_string(oss2.str());
         }
-        std::ofstream output_file(file_path.c_str(), std::ios_base::binary);
+
+        // Open the file to save
+        std::ofstream output_file(file_path, std::ios_base::binary);
         if (!output_file){
             std::cout << "[ERROR] Failed to open " << file_path << std::endl;
             //TODO gestire errore
         }
 
-        // write extra bytes to file
-        //TODO why?
-        do {
-            request_stream.read(buf.c_array(), (std::streamsize)buf.size());
-            if(DEBUG) {
-                std::cout << "[DEBUG] " << __FUNCTION__ << " wrote " << request_stream.gcount() << " bytes" << std::endl;
-            }
-            output_file.write(buf.c_array(), request_stream.gcount());
-        } while (request_stream.gcount()>0);
-
         for(;;) {
-            size_t len = socket->read_some(boost::asio::buffer(buf), error);
+            size_t len = main_socket_->read_some(boost::asio::buffer(buf), error);
             if (len>0)
                 output_file.write(buf.c_array(), (std::streamsize)len);
             if (output_file.tellp() == (std::fstream::pos_type)(std::streamsize)file_size)
@@ -340,8 +381,7 @@ void Connection::handle_read_file(std::unique_ptr<tcp::socket> socket) {
 
 std::unordered_map<std::string, std::string> Connection::get_filesystem_status() {
     send_string("checkFilesystemStatus");
-    std::cout << read_string(); // Read server confirm G.R.
-
+    std::cout << read_string(); // Read server's response
 
     std::string serialized_data = read_string();
     std::stringstream archive_stream(serialized_data);
