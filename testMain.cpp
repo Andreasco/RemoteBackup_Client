@@ -82,7 +82,7 @@ void fileWatcherTest () {
 }
 
 void sendStringTest(){
-    Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles/");
+    Connection s("0.0.0.0", 5004);
     std::cout << s.read_string();
     std::string message;
     while(message != "stop") {
@@ -93,7 +93,7 @@ void sendStringTest(){
 }
 
 void getFileTest(){
-    Connection s("0.0.0.0", 5004, "/home/guido/Scrivania/TestProgetto/synch_folder/");
+    Connection s("0.0.0.0", 5004);
     std::string input;
     std::cout << "Do you want to login now?(y/n): ";
     std::getline(std::cin, input);
@@ -104,7 +104,7 @@ void getFileTest(){
         std::cout << "Do you want to read the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
-            s.get_file("/home/guido/Scrivania/TestProgetto/synch_folder/Appunti_di_Topologia_(Ferrarotti).pdf");
+            s.get_file("/Appunti_di_Topologia_(Ferrarotti).pdf");
 
             s.close_connection();
         }
@@ -121,8 +121,7 @@ void checksumTest(){
 }
 
 void addFileTest(){
-    std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
-    Connection s("0.0.0.0", 5004, base_path_);
+    Connection s("0.0.0.0", 5004);
 
     std::string input;
     std::cout << "Do you want to login now?(y/n): ";
@@ -134,7 +133,7 @@ void addFileTest(){
         std::cout << "Do you want to send the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
-            s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
+            s.add_file("/invio_client.txt");
             //s.add_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client2.txt");
 
             // In order to wait the sending of the files, since they are made by different threads
@@ -148,8 +147,7 @@ void addFileTest(){
 }
 
 void getFilesystemStatusTest(){
-    std::string base_path_ = "/Users/andreascopp/Desktop/Client-TestFiles/";
-    Connection s("0.0.0.0", 5004, base_path_);
+    Connection s("0.0.0.0", 5004);
 
     std::string input;
     std::cout << "Do you want to login now?(y/n): ";
