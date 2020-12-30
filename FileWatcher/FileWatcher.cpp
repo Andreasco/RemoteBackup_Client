@@ -90,7 +90,7 @@ void FileWatcher::initial_check(const std::function<void (std::string, Connectio
         if (!contains(it_server->first)) {
             if(DEBUG)
                 std::cout << "[DEBUG] [FileWatcher] File " << it_server->first << " present on server and not on client" << std::endl;
-            action(it_client->first, conn_, FileStatus::erased);
+            action(complete_path(it_client->first), conn_, FileStatus::erased);
         }
         it_server++;
     }

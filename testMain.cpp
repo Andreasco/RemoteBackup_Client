@@ -9,6 +9,8 @@ void fileWatcherTest () {
     std::string path_to_watch;
     std::cin >> path_to_watch;
 
+    path_to_watch.erase(path_to_watch.length()-1); // To remove \n
+
     // Create a Connection
     Connection conn_("0.0.0.0", 5004, path_to_watch);
     conn_.send_string("login guido guido.poli");
@@ -39,8 +41,8 @@ void fileWatcherTest () {
                 std::cout << "File modified: " << file_path << '\n';
                 break;
             case FileStatus::erased:
-                conn_.remove_file(file_path);
-                std::cout << "File erased: " << file_path << '\n';
+                conn_.get_file(file_path);
+                std::cout << "File retreived: " << file_path << '\n';
                 break;
             default:
                 std::cout << "Error! Unknown file status.\n";
@@ -89,7 +91,7 @@ void sendStringTest(){
     }
 }
 
-void readFileTest(){
+void getFileTest(){
     Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles/");
     std::string input;
     std::cout << "Do you want to login now?(y/n): ";
@@ -181,7 +183,7 @@ int main() {
     // Add new options as needed
     std::cout << "0 - fileWatcherTest" << std::endl;
     std::cout << "1 - sendStringTest" << std::endl;
-    std::cout << "2 - readFileTest" << std::endl;
+    std::cout << "2 - getFileTest" << std::endl;
     std::cout << "3 - checksumTest" << std::endl;
     std::cout << "4 - addFileTest" << std::endl;
     std::cout << "5 - getFilesystemStatusTest" << std::endl;
@@ -202,8 +204,8 @@ int main() {
             sendStringTest();
             break;
         case 2:
-            std::cout << "Read File Test Initialized" << std::endl;
-            readFileTest();
+            std::cout << "Get File Test Initialized" << std::endl;
+            getFileTest();
             break;
         case 3:
             std::cout << "Checksum Test Initialized" << std::endl;
