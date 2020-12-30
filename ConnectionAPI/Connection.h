@@ -23,7 +23,6 @@ private:
     std::shared_ptr<tcp::socket> main_socket_;
     boost::asio::thread_pool pool_;
 
-    std::string base_path_;
     std::string server_ip_address_;
     int server_port_number_;
 
@@ -36,7 +35,7 @@ private:
 public:
     /******************* CONSTRUCTOR **********************************************************************************/
 
-    Connection(std::string  ip_address, int port_number, std::string  base_path);
+    Connection(std::string  ip_address, int port_number);
 
     /******************* DESTRUCTOR **********************************************************************************/
 

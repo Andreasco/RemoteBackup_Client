@@ -7,8 +7,8 @@
 /******************* CONSTRUCTOR **********************************************************************************/
 
 //TODO Gestire gli errori della creazione del main_socket_
-Connection::Connection(std::string ip_address, int port_number, std::string base_path):
-    io_context_(), read_timer_(io_context_), pool_(2), server_ip_address_(std::move(ip_address)), server_port_number_(port_number), base_path_(std::move(base_path)), reading(false), closed(false) {
+Connection::Connection(std::string ip_address, int port_number):
+    io_context_(), read_timer_(io_context_), pool_(2), server_ip_address_(std::move(ip_address)), server_port_number_(port_number), reading(false), closed(false) {
     try {
         main_socket_ = std::make_unique<tcp::socket>(io_context_); //Prova per cercare di inizializzare il socket_ DOPO io_context_
         main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
@@ -181,11 +181,9 @@ void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, 
 /******************* FILES METHODS ******************************************************************************/
 
 void Connection::remove_file(const std::string &file_path) {
-    std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
-
     std::ostringstream oss;
     oss << "removeFile ";
-    oss << cleaned_file_path;
+    oss << file_path;
     oss << "\n";
     send_string(oss.str());
 
@@ -223,20 +221,17 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
         //TODO gestire errore
     }
 
-    std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
     size_t file_size = source_file.tellg();
     std::string file_size_readable = file_size_to_readable(file_size);
 
     if(DEBUG) {
         //std::cout << "[DEBUG] " << file_path << " size is: " << file_size_readable << std::endl;
         print_string("[DEBUG] " + file_path + " size is: " + file_size_readable);
-        //std::cout << "[DEBUG] Cleaned file path: " << cleaned_file_path << std::endl;
-        print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
     }
 
     std::ostringstream oss;
     oss << command + " ";
-    oss << cleaned_file_path;
+    oss << file_path;
     oss << " ";
     oss << file_size;
     send_string(oss.str());
@@ -322,16 +317,14 @@ void Connection::get_file(const std::string &file_path) {
         boost::system::error_code error;
         boost::asio::streambuf request_buf;
 
-        std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
-
         if(DEBUG) {
-            print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
+            print_string("[DEBUG] File path: " + file_path);
         }
 
         // Send the command to request the file
         std::ostringstream oss;
         oss <<  "getFile ";
-        oss << cleaned_file_path;
+        oss << file_path;
         send_string(oss.str());
 
         // Receive file size
