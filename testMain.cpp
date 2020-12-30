@@ -9,7 +9,8 @@ void fileWatcherTest () {
     std::string path_to_watch;
     std::cin >> path_to_watch;
 
-    path_to_watch.erase(path_to_watch.length()-1); // To remove \n
+    //path_to_watch.erase(path_to_watch.length()-1);  To remove \n
+    std::cout << "Watching path " << path_to_watch << std::endl;
 
     // Create a Connection
     Connection conn_("0.0.0.0", 5004, path_to_watch);
@@ -92,7 +93,7 @@ void sendStringTest(){
 }
 
 void getFileTest(){
-    Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles/");
+    Connection s("0.0.0.0", 5004, "/home/guido/Scrivania/TestProgetto/synch_folder/");
     std::string input;
     std::cout << "Do you want to login now?(y/n): ";
     std::getline(std::cin, input);
@@ -103,7 +104,7 @@ void getFileTest(){
         std::cout << "Do you want to read the file now?(y/n): ";
         std::getline(std::cin, input);
         if (input == "y") {
-            s.get_file("/Users/andreascopp/Desktop/Client-TestFiles/invio_client.txt");
+            s.get_file("/home/guido/Scrivania/TestProgetto/synch_folder/Appunti_di_Topologia_(Ferrarotti).pdf");
 
             s.close_connection();
         }

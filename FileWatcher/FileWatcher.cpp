@@ -52,6 +52,10 @@ void FileWatcher::start(const std::function<void (std::string, Connection&, File
 void FileWatcher::initial_check(const std::function<void (std::string, Connection&, FileStatus)> &action){
 
     std::unordered_map<std::string, std::string> server = conn_.get_filesystem_status();
+
+    for (auto& [key, value]: server) {
+        std::cout << key << " => " << value << '\n';
+    }
     //std::unordered_map<std::string, std::string> server = std::unordered_map<std::string, std::string>();
     if(DEBUG)
         std::cout << "[DEBUG] [FileWatcher] FileSystemStatus received" << std::endl;
@@ -90,7 +94,7 @@ void FileWatcher::initial_check(const std::function<void (std::string, Connectio
         if (!contains(it_server->first)) {
             if(DEBUG)
                 std::cout << "[DEBUG] [FileWatcher] File " << it_server->first << " present on server and not on client" << std::endl;
-            action(complete_path(it_client->first), conn_, FileStatus::erased);
+            action(complete_path(it_server->first), conn_, FileStatus::erased);
         }
         it_server++;
     }
