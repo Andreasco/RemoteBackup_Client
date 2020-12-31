@@ -13,7 +13,7 @@ void fileWatcherTest () {
     std::cout << "Watching path " << path_to_watch << std::endl;
 
     // Create a Connection
-    Connection conn_("0.0.0.0", 5004, path_to_watch);
+    Connection conn_("0.0.0.0", 5004);
     conn_.send_string("login guido guido.poli");
     std::cout << conn_.read_string(); // Read server confirm G.R.
 
@@ -41,7 +41,7 @@ void fileWatcherTest () {
                 conn_.update_file(file_path);
                 std::cout << "File modified: " << file_path << '\n';
                 break;
-            case FileStatus::erased:
+            case FileStatus::missing:
                 conn_.get_file(file_path);
                 std::cout << "File retreived: " << file_path << '\n';
                 break;

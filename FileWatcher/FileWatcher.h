@@ -17,7 +17,7 @@
 #include "../ChecksumAPI/Checksum.h"
 
 // Define available file changes
-enum class FileStatus {created, modified, erased};
+enum class FileStatus {created, modified, erased, missing};
 
 bool map_contains(std::unordered_map<std::string, std::string> &file_map, const std::string &key);
 
