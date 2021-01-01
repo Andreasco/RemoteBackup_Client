@@ -6,25 +6,27 @@
 
 /******************* CONSTRUCTOR **********************************************************************************/
 
-//TODO Gestire gli errori della creazione del main_socket_
-Connection::Connection(std::string ip_address, int port_number):
-    io_context_(), read_timer_(io_context_), pool_(2), server_ip_address_(std::move(ip_address)), server_port_number_(port_number), reading(false), closed(false) {
-    try {
+Connection::Connection(std::string ip_address, int port_number) try:
+    io_context_(),
+    read_timer_(io_context_),
+    server_ip_address_(std::move(ip_address)),
+    server_port_number_(port_number),
+    reading(false), closed(false) {
         main_socket_ = std::make_unique<tcp::socket>(io_context_); //Prova per cercare di inizializzare il socket_ DOPO io_context_
         main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
         /*
-         * Otherwise delete line 23, delete unique pointer at line 17 and
-         * add socket_(io_context_) at line 18 after io_context_()
+         * Otherwise delete line 23, delete unique pointer at line 17 and add
+         * socket_(io_context_) at line 18 after io_context_()
          */
     }
     catch(std::exception& e) {
         if(DEBUG) {
             std::cout << "[ERROR] Entered in the catch" << std::endl;
+            std::cout << e.what() << std::endl;
         }
-        std::cout << e.what() << std::endl;
+        std::cout << "Could not initialize client, please try again." << std::endl;
         throw e;
     }
-}
 
 /******************* DESTRUCTOR **********************************************************************************/
 
@@ -48,7 +50,7 @@ std::string Connection::file_size_to_readable(int file_size) {
     std::string measures[] = {"bytes", "KB", "MB", "GB", "TB"};
     int i = 0;
     int new_file_size = file_size;
-    while (new_file_size > 1024){ //NOTE on Mac is 1000, it uses powers of 10
+    while (new_file_size > 1024){ // NOTE on Mac is 1000, it uses powers of 10
         new_file_size = new_file_size / 1024;
         i++;
     }
@@ -148,6 +150,7 @@ std::string Connection::read_string_with_deadline(int deadline_seconds) {
     }
 
     reading = false; // In this way I don't risk that the main thread get stuck for some reason on line 135 when reading = true and resume his workflow after the end of the reading thread where I should set reading = false;
+    return "-1"; // I shouldn't get here
 }
 
 void Connection::send_string(const std::string &message) {
@@ -197,7 +200,8 @@ void Connection::remove_file(const std::string &file_path) {
         if(DEBUG) {
             std::cout << "[DEBUG] Server error or no confirmation received" << std::endl;
         }
-        remove_file(file_path);
+        //FIXME this fires everytime
+        //remove_file(file_path);
     }
 
     // Read the confirm of receipt from the server
@@ -218,7 +222,24 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     if(!source_file) {
         //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
         print_string("[ERROR] Failed to open " + file_path);
-        //TODO gestire errore
+
+        // Error handling
+        std::string input;
+        do {
+            print_string("Do you want to try to open it again? (y/n)");
+            std::getline(std::cin, input);
+            if (input == "y")
+                handle_send_file(file_path, command);
+            else if (input == "n") {
+                std::ostringstream oss;
+                oss << "Ok, the file: ";
+                oss << file_path;
+                oss << " won't be included in the backup";
+                print_string(oss.str());
+
+                return;
+            }
+        } while (input != "y" && input != "n");
     }
 
     size_t file_size = source_file.tellg();
@@ -246,6 +267,7 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
         if(DEBUG) {
             std::cout << "[DEBUG] Server error or no confirmation received" << std::endl;
         }
+        //FIXME this fires everytime and it would break the server, i need to close the connection and open another one
         //handle_send_file(file_path, command);
     }
 
@@ -287,7 +309,7 @@ void Connection::do_send_file(std::ifstream source_file) {
         }*/
 
         if(bytes_read_from_file<=0) {
-            std::cout << "[ERROR] Read file error" << std::endl;
+            std::cout << "[ERROR] Read file to send error" << std::endl;
             break;
             //TODO gestire questo errore
         }
@@ -310,10 +332,34 @@ void Connection::do_send_file(std::ifstream source_file) {
 }
 
 void Connection::get_file(const std::string &file_path) {
-    boost::array<char, 1024> buf{};
+    // Open the file to save
+    std::ofstream output_file(file_path, std::ios_base::binary);
+    if(!output_file) {
+        //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
+        print_string("[ERROR] Failed to save " + file_path);
+
+        // Error handling
+        std::string input;
+        do {
+            print_string("Do you want to try to save it again? (y/n)");
+            std::getline(std::cin, input);
+            if (input == "y")
+                get_file(file_path);
+            else if (input == "n") {
+                std::ostringstream oss2;
+                oss2 << "Ok, the file: ";
+                oss2 << file_path;
+                oss2 << " won't be retreived from the server";
+                print_string(oss2.str());
+
+                return;
+            }
+        } while (input != "y" && input != "n");
+    }
 
     // Probabilmente il try non serve
     try {
+        boost::array<char, 1024> buf{};
         boost::system::error_code error;
         boost::asio::streambuf request_buf;
 
@@ -343,13 +389,6 @@ void Connection::get_file(const std::string &file_path) {
             print_string(oss2.str());
         }
 
-        // Open the file to save
-        std::ofstream output_file(file_path, std::ios_base::binary);
-        if (!output_file){
-            std::cout << "[ERROR] Failed to open " << file_path << std::endl;
-            //TODO gestire errore
-        }
-
         for(;;) {
             size_t len = main_socket_->read_some(boost::asio::buffer(buf), error);
             if (len>0)
@@ -358,6 +397,7 @@ void Connection::get_file(const std::string &file_path) {
                 break; // File was received
             if (error){
                 std::cout << "[ERROR] Save file error: " << error << std::endl;
+                //TODO error handling
                 break;
             }
         }
