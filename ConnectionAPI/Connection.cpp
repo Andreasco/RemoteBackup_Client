@@ -6,12 +6,13 @@
 
 /******************* CONSTRUCTOR **********************************************************************************/
 
-Connection::Connection(std::string ip_address, int port_number) try:
-    io_context_(),
-    read_timer_(io_context_),
-    server_ip_address_(std::move(ip_address)),
-    server_port_number_(port_number),
-    reading(false), closed(false) {
+Connection::Connection(std::string ip_address, int port_number, std::string base_path) try:
+        io_context_(),
+        read_timer_(io_context_),
+        server_ip_address_(std::move(ip_address)),
+        server_port_number_(port_number),
+        base_path_(std::move(base_path)),
+        reading_(false), closed_(false) {
         main_socket_ = std::make_unique<tcp::socket>(io_context_); //Prova per cercare di inizializzare il socket_ DOPO io_context_
         main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
         /*
@@ -31,8 +32,44 @@ Connection::Connection(std::string ip_address, int port_number) try:
 /******************* DESTRUCTOR **********************************************************************************/
 
 Connection::~Connection() {
-    if(!closed) {
+    if(!closed_) {
         close_connection();
+    }
+}
+
+/******************* ERROR HANDLING ******************************************************************************/
+
+void Connection::handle_add_file_error(const std::string &file_path){
+    try {
+        close_connection();
+        open_new_connection();
+        add_file(file_path);
+    }
+    catch(std::exception& e) {
+        if(DEBUG) {
+            std::cout << "[ERROR] Entered in the catch" << std::endl;
+            std::cout << e.what() << std::endl;
+        }
+        std::cout << "Fatal error, please try again." << std::endl;
+        throw e;
+        //TODO check from the slides if I need to throw it
+    }
+}
+
+void Connection::handle_update_file_error(const std::string &file_path){
+    try {
+        close_connection();
+        open_new_connection();
+        update_file(file_path);
+    }
+    catch(std::exception& e) {
+        if(DEBUG) {
+            std::cout << "[ERROR] Entered in the catch" << std::endl;
+            std::cout << e.what() << std::endl;
+        }
+        std::cout << "Fatal error, please try again." << std::endl;
+        throw e;
+        //TODO check from the slides if I need to throw it
     }
 }
 
@@ -57,24 +94,48 @@ std::string Connection::file_size_to_readable(int file_size) {
     return std::to_string(new_file_size) + " " + measures[i];
 }
 
+void Connection::open_new_connection(){
+    main_socket_ = std::make_unique<tcp::socket>(io_context_);
+    main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
+    closed_ = false;
+
+    std::ostringstream oss;
+    oss << "login ";
+    oss << username_;
+    oss << " ";
+    oss << password_;
+    send_string(oss.str());
+}
+
 void Connection::close_connection() {
     handle_close_connection(main_socket_);
 }
 
-void Connection::close_connection(const std::shared_ptr<tcp::socket> &socket) {
+/*void Connection::close_connection(const std::shared_ptr<tcp::socket> &socket) {
     handle_close_connection(socket);
-}
+}*/
 
 void Connection::handle_close_connection(const std::shared_ptr<tcp::socket> &socket){
     const std::string message = "close";
     send_string(message);
     socket->close();
-    closed = true;
+    closed_ = true;
 }
 
 void Connection::print_string(const std::string &message) {
     std::lock_guard lg (mutex_);
     std::cout << message << std::endl;
+}
+
+void Connection::check_if_logging(const std::string &message){
+    std::regex regex("^(login )(.*)");
+    if(regex_match (message, regex)){ // I'm logging in, I need to save the credentials
+        std::string username_password = message.substr(message.find(' '), message.length()); // To get rid of "login"
+
+        std::istringstream tokenizer(username_password);
+        tokenizer >> username_;
+        tokenizer >> password_;
+    }
 }
 
 /******************* STRINGS METHODS ******************************************************************************/
@@ -83,9 +144,9 @@ std::string Connection::read_string() {
     return handle_read_string(main_socket_);
 }
 
-std::string Connection::read_string(const std::shared_ptr<tcp::socket> &socket) {
+/*std::string Connection::read_string(const std::shared_ptr<tcp::socket> &socket) {
     return handle_read_string(socket);
-}
+}*/
 
 std::string Connection::handle_read_string(const std::shared_ptr<tcp::socket> &socket) {
     boost::system::error_code error;
@@ -111,8 +172,8 @@ std::string Connection::handle_read_string(const std::shared_ptr<tcp::socket> &s
 std::string Connection::read_string_with_deadline(int deadline_seconds) {
     boost::asio::streambuf buf;
     boost::asio::async_read_until(*main_socket_, buf, "\n", [this](boost::system::error_code error, std::size_t bytes_read) -> std::string{
-        reading = true;
-        read_timer_.cancel(); // Cancel the timer because I started reading
+        reading_ = true;
+        read_timer_.cancel(); // Cancel the timer because I started reading_
 
         boost::asio::streambuf buf;
         if(!error) {
@@ -135,7 +196,7 @@ std::string Connection::read_string_with_deadline(int deadline_seconds) {
     read_timer_.expires_from_now(boost::posix_time::seconds(deadline_seconds));
     read_timer_.wait(err);
     if(!err) {
-        if(!reading) {
+        if(!reading_) {
             if (DEBUG) {
                 print_string("[DEBUG] Read timeout occurred");
             }
@@ -149,7 +210,7 @@ std::string Connection::read_string_with_deadline(int deadline_seconds) {
         print_string("[ERROR] Timer error: " + err.message());
     }
 
-    reading = false; // In this way I don't risk that the main thread get stuck for some reason on line 135 when reading = true and resume his workflow after the end of the reading thread where I should set reading = false;
+    reading_ = false; // In this way I don't risk that the main thread get stuck for some reason on line 135 when reading_ = true and resume his workflow after the end of the reading_ thread where I should set reading_ = false;
     return "-1"; // I shouldn't get here
 }
 
@@ -157,15 +218,19 @@ void Connection::send_string(const std::string &message) {
     handle_send_string(main_socket_, message);
 }
 
-void Connection::send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message) {
+/*void Connection::send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message) {
     handle_send_string(socket, message);
-}
+}*/
 
 void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message) {
     if(DEBUG) {
         //std::cout << "[DEBUG] Sending string: " << message << std::endl;
         print_string("[DEBUG] Sending string: " + message);
     }
+
+    // If I'm logging in, I need to save the credentials to reopen a connection in case of errors
+    check_if_logging(message);
+
     const std::string msg = message + "\n";
     boost::system::error_code error;
     boost::asio::write(*socket, boost::asio::buffer(msg), error);
@@ -184,9 +249,11 @@ void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, 
 /******************* FILES METHODS ******************************************************************************/
 
 void Connection::remove_file(const std::string &file_path) {
+    std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
+
     std::ostringstream oss;
     oss << "removeFile ";
-    oss << file_path;
+    oss << cleaned_file_path;
     oss << "\n";
     send_string(oss.str());
 
@@ -209,11 +276,27 @@ void Connection::remove_file(const std::string &file_path) {
 }
 
 void Connection::update_file(const std::string &file_path) {
-    handle_send_file(file_path, "updateFile");
+    try {
+        handle_send_file(file_path, "updateFile");
+    }
+    catch (std::runtime_error& e){
+        if(DEBUG) {
+            std::cout << e.what() << std::endl;
+        }
+        handle_update_file_error(file_path);
+    }
 }
 
 void Connection::add_file(const std::string &file_path) {
-    handle_send_file(file_path, "addFile");
+    try {
+        handle_send_file(file_path, "addFile");
+    }
+    catch (std::runtime_error& e){
+        if(DEBUG) {
+            std::cout << e.what() << std::endl;
+        }
+        handle_add_file_error(file_path);
+    }
 }
 
 void Connection::handle_send_file(const std::string &file_path, const std::string &command) {
@@ -222,6 +305,8 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     if(!source_file) {
         //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
         print_string("[ERROR] Failed to open " + file_path);
+
+        //TODO try to handle it throwing an exception and catching it outside, I probably need to define a custom exception (it may be a struct)
 
         // Error handling
         std::string input;
@@ -242,17 +327,20 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
         } while (input != "y" && input != "n");
     }
 
+    std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
     size_t file_size = source_file.tellg();
     std::string file_size_readable = file_size_to_readable(file_size);
 
     if(DEBUG) {
         //std::cout << "[DEBUG] " << file_path << " size is: " << file_size_readable << std::endl;
         print_string("[DEBUG] " + file_path + " size is: " + file_size_readable);
+        //std::cout << "[DEBUG] Cleaned file path: " << cleaned_file_path << std::endl;
+        print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
     }
 
     std::ostringstream oss;
     oss << command + " ";
-    oss << file_path;
+    oss << cleaned_file_path;
     oss << " ";
     oss << file_size;
     send_string(oss.str());
@@ -271,7 +359,7 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
         //handle_send_file(file_path, command);
     }
 
-    do_send_file(std::move(source_file));
+    do_send_file(std::move(source_file)); // May throw runtime_error
 
     // Read the confirm of file receipt from the server
     print_string(read_string());
@@ -303,22 +391,21 @@ void Connection::do_send_file(std::ifstream source_file) {
         int bytes_read_from_file = source_file.gcount(); //int is fine because i read at most buf's size, 1024 in this case
 
         // If uncommented the progress is printed in multiple lines succeded from this line
-        // Only use to debug file reading otherwise the progress gets unreadable
+        // Only use to debug file reading_ otherwise the progress gets unreadable
         /*if(DEBUG){
             std::cout << "[DEBUG] Bytes read from file: " << bytes_read_from_file << std::endl;
         }*/
 
         if(bytes_read_from_file<=0) {
             std::cout << "[ERROR] Read file to send error" << std::endl;
-            break;
-            //TODO gestire questo errore
+            throw std::runtime_error("Read file to send error");
         }
 
         boost::asio::write(*main_socket_, boost::asio::buffer(buf.c_array(), source_file.gcount()),
                            boost::asio::transfer_all(), error);
         if(error) {
             std::cout << "[ERROR] Send file error: " << error << std::endl;
-            //TODO lanciare un'eccezione?
+            throw std::runtime_error("Send file error");
         }
 
         bytes_sent += bytes_read_from_file;
@@ -332,11 +419,18 @@ void Connection::do_send_file(std::ifstream source_file) {
 }
 
 void Connection::get_file(const std::string &file_path) {
+    std::string complete_file_path = file_path.substr(base_path_.length(), file_path.length());
+
+    if(DEBUG) {
+        print_string("[DEBUG] Complete file path: " + complete_file_path);
+        print_string("[DEBUG] File path: " + file_path);
+    }
+
     // Open the file to save
-    std::ofstream output_file(file_path, std::ios_base::binary);
+    std::ofstream output_file(complete_file_path, std::ios_base::binary);
     if(!output_file) {
         //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
-        print_string("[ERROR] Failed to save " + file_path);
+        print_string("[ERROR] Failed to save " + complete_file_path);
 
         // Error handling
         std::string input;
@@ -362,10 +456,6 @@ void Connection::get_file(const std::string &file_path) {
         boost::array<char, 1024> buf{};
         boost::system::error_code error;
         boost::asio::streambuf request_buf;
-
-        if(DEBUG) {
-            print_string("[DEBUG] File path: " + file_path);
-        }
 
         // Send the command to request the file
         std::ostringstream oss;
@@ -401,8 +491,17 @@ void Connection::get_file(const std::string &file_path) {
                 break;
             }
         }
+
+        int bytes_received = output_file.tellp();
+
         if(DEBUG) {
-            std::cout << "[DEBUG] Received " << output_file.tellp() << " bytes.\n";
+            std::cout << "[DEBUG] Received " << bytes_received << " bytes." << std::endl;
+        }
+
+        if(bytes_received != file_size) {
+            std::cout << "[ERROR] File size and bytes receveid DOES NOT correspond!" << std::endl;
+            std::cout << "File size: " << file_size << std::endl;
+            std::cout << "Bytes received: " << bytes_received << std::endl;
         }
     }
     catch(std::exception& e) {

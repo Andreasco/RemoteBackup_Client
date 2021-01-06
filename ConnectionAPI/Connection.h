@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <regex>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/serialization/unordered_map.hpp>
@@ -23,23 +24,33 @@ private:
     std::shared_ptr<tcp::socket> main_socket_;
     boost::asio::thread_pool pool_;
 
+    std::string base_path_;
     std::string server_ip_address_;
     int server_port_number_;
 
+    std::string username_;
+    std::string password_;
+
     boost::asio::deadline_timer read_timer_;
-    bool reading;
-    bool closed;
+    bool reading_;
+    bool closed_;
 
     std::mutex mutex_;
 
 public:
     /******************* CONSTRUCTOR **********************************************************************************/
 
-    Connection(std::string  ip_address, int port_number);
+    Connection(std::string  ip_address, int port_number, std::string base_path);
 
     /******************* DESTRUCTOR **********************************************************************************/
 
     ~Connection();
+
+    /******************* ERROR HANDLING ******************************************************************************/
+
+    void handle_add_file_error(const std::string &file_path);
+
+    void handle_update_file_error(const std::string &file_path);
 
     /******************* UTILITY METHODS ******************************************************************************/
 
@@ -47,7 +58,9 @@ public:
 
     static std::string file_size_to_readable(int file_size);
 
-    void close_connection(const std::shared_ptr<tcp::socket>& socket);
+    void open_new_connection();
+
+    /*void close_connection(const std::shared_ptr<tcp::socket>& socket);*/
 
     void close_connection();
 
@@ -55,11 +68,13 @@ public:
 
     void print_string(const std::string& message);
 
+    void check_if_logging(const std::string &message);
+
     /******************* STRINGS METHODS ******************************************************************************/
 
     std::string read_string();
 
-    std::string read_string(const std::shared_ptr<tcp::socket>& socket);
+    /*std::string read_string(const std::shared_ptr<tcp::socket>& socket);*/
 
     std::string handle_read_string(const std::shared_ptr<tcp::socket> &socket);
 
@@ -67,7 +82,7 @@ public:
 
     void send_string(const std::string& message);
 
-    void send_string(const std::shared_ptr<tcp::socket>& socket, const std::string& message);
+    /*void send_string(const std::shared_ptr<tcp::socket>& socket, const std::string& message);*/
 
     void handle_send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message);
 

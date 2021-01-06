@@ -13,7 +13,7 @@ void fileWatcherTest () {
     std::cout << "Watching path " << path_to_watch << std::endl;
 
     // Create a Connection
-    Connection conn_("0.0.0.0", 5004);
+    Connection conn_("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles");
     conn_.send_string("login guido guido.poli");
     std::cout << conn_.read_string(); // Read server confirm G.R.
 
@@ -82,7 +82,7 @@ void fileWatcherTest () {
 }
 
 void sendStringTest(){
-    Connection s("0.0.0.0", 5004);
+    Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles");
     std::cout << s.read_string();
     std::string message;
     while(message != "stop") {
@@ -93,7 +93,7 @@ void sendStringTest(){
 }
 
 void getFileTest(){
-    Connection s("0.0.0.0", 5004);
+    Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles");
     std::string input;
     std::cout << "Do you want to login now?(y/n): ";
     std::getline(std::cin, input);
@@ -121,7 +121,7 @@ void checksumTest(){
 }
 
 void addFileTest(){
-    Connection s("0.0.0.0", 5004);
+    Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles");
 
     std::string input;
     std::cout << "Do you want to login now?(y/n): ";
@@ -147,7 +147,7 @@ void addFileTest(){
 }
 
 void getFilesystemStatusTest(){
-    Connection s("0.0.0.0", 5004);
+    Connection s("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles");
 
     std::string input;
     std::cout << "Do you want to login now?(y/n): ";
