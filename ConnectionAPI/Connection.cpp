@@ -4,7 +4,7 @@
 
 #include "Connection.h"
 
-/******************* CONSTRUCTOR **********************************************************************************/
+/******************* CONSTRUCTOR **************************************************************************************/
 
 Connection::Connection(std::string ip_address, int port_number, std::string base_path) try:
         io_context_(),
@@ -13,12 +13,8 @@ Connection::Connection(std::string ip_address, int port_number, std::string base
         server_port_number_(port_number),
         base_path_(std::move(base_path)),
         reading_(false), closed_(false) {
-        main_socket_ = std::make_unique<tcp::socket>(io_context_); //Prova per cercare di inizializzare il socket_ DOPO io_context_
+        main_socket_ = std::make_unique<tcp::socket>(io_context_);
         main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
-        /*
-         * Otherwise delete line 23, delete unique pointer at line 17 and add
-         * socket_(io_context_) at line 18 after io_context_()
-         */
     }
     catch(std::exception& e) {
         if(DEBUG) {
@@ -27,9 +23,10 @@ Connection::Connection(std::string ip_address, int port_number, std::string base
         }
         std::cout << "Could not initialize client, please try again." << std::endl;
         throw e;
+        //TODO check from the slides if I need to throw it
     }
 
-/******************* DESTRUCTOR **********************************************************************************/
+/******************* DESTRUCTOR ***************************************************************************************/
 
 Connection::~Connection() {
     if(!closed_) {
@@ -37,7 +34,7 @@ Connection::~Connection() {
     }
 }
 
-/******************* ERROR HANDLING ******************************************************************************/
+/******************* ERROR HANDLING ***********************************************************************************/
 
 void Connection::handle_add_file_error(const std::string &file_path){
     try {
@@ -73,7 +70,7 @@ void Connection::handle_update_file_error(const std::string &file_path){
     }
 }
 
-/******************* UTILITY METHODS ******************************************************************************/
+/******************* UTILITY METHODS **********************************************************************************/
 
 void Connection::print_percentage(float percent) {
     float hashes = percent / 5;
@@ -99,12 +96,7 @@ void Connection::open_new_connection(){
     main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
     closed_ = false;
 
-    std::ostringstream oss;
-    oss << "login ";
-    oss << username_;
-    oss << " ";
-    oss << password_;
-    send_string(oss.str());
+    login(username_, password_);
 }
 
 void Connection::close_connection() {
@@ -127,18 +119,7 @@ void Connection::print_string(const std::string &message) {
     std::cout << message << std::endl;
 }
 
-void Connection::check_if_logging(const std::string &message){
-    std::regex regex("^(login )(.*)");
-    if(regex_match (message, regex)){ // I'm logging in, I need to save the credentials
-        std::string username_password = message.substr(message.find(' '), message.length()); // To get rid of "login"
-
-        std::istringstream tokenizer(username_password);
-        tokenizer >> username_;
-        tokenizer >> password_;
-    }
-}
-
-/******************* STRINGS METHODS ******************************************************************************/
+/******************* STRINGS METHODS **********************************************************************************/
 
 std::string Connection::read_string() {
     return handle_read_string(main_socket_);
@@ -228,9 +209,6 @@ void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, 
         print_string("[DEBUG] Sending string: " + message);
     }
 
-    // If I'm logging in, I need to save the credentials to reopen a connection in case of errors
-    check_if_logging(message);
-
     const std::string msg = message + "\n";
     boost::system::error_code error;
     boost::asio::write(*socket, boost::asio::buffer(msg), error);
@@ -246,7 +224,23 @@ void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, 
     }
 }
 
-/******************* FILES METHODS ******************************************************************************/
+/******************* LOGIN ********************************************************************************************/
+
+void Connection::login(const std::string &username, const std::string &password){
+    // If I'm logging in, I need to save the credentials to reopen a connection in case of errors
+    username_ = username;
+    password_ = password;
+
+    std::ostringstream oss;
+    oss << "login ";
+    oss << username;
+    oss << " ";
+    oss << password;
+
+    send_string(oss.str());
+}
+
+/******************* FILES METHODS ************************************************************************************/
 
 void Connection::remove_file(const std::string &file_path) {
     std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
@@ -419,18 +413,18 @@ void Connection::do_send_file(std::ifstream source_file) {
 }
 
 void Connection::get_file(const std::string &file_path) {
-    std::string complete_file_path = file_path.substr(base_path_.length(), file_path.length());
+    std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
 
     if(DEBUG) {
-        print_string("[DEBUG] Complete file path: " + complete_file_path);
+        print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
         print_string("[DEBUG] File path: " + file_path);
     }
 
     // Open the file to save
-    std::ofstream output_file(complete_file_path, std::ios_base::binary);
+    std::ofstream output_file(file_path, std::ios_base::binary);
     if(!output_file) {
         //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
-        print_string("[ERROR] Failed to save " + complete_file_path);
+        print_string("[ERROR] Failed to save " + file_path);
 
         // Error handling
         std::string input;
@@ -460,7 +454,7 @@ void Connection::get_file(const std::string &file_path) {
         // Send the command to request the file
         std::ostringstream oss;
         oss <<  "getFile ";
-        oss << file_path;
+        oss << cleaned_file_path;
         send_string(oss.str());
 
         // Receive file size
@@ -509,7 +503,7 @@ void Connection::get_file(const std::string &file_path) {
     }
 }
 
-/******************* SERIALIZATION ******************************************************************************/
+/******************* SERIALIZATION ************************************************************************************/
 
 std::unordered_map<std::string, std::string> Connection::get_filesystem_status() {
     send_string("checkFilesystemStatus");

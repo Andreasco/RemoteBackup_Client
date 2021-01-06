@@ -20,9 +20,9 @@ using boost::asio::ip::tcp;
 
 class Connection {
 private:
+
     boost::asio::io_context io_context_;
     std::shared_ptr<tcp::socket> main_socket_;
-    boost::asio::thread_pool pool_;
 
     std::string base_path_;
     std::string server_ip_address_;
@@ -36,15 +36,6 @@ private:
     bool closed_;
 
     std::mutex mutex_;
-
-public:
-    /******************* CONSTRUCTOR **********************************************************************************/
-
-    Connection(std::string  ip_address, int port_number, std::string base_path);
-
-    /******************* DESTRUCTOR **********************************************************************************/
-
-    ~Connection();
 
     /******************* ERROR HANDLING ******************************************************************************/
 
@@ -60,15 +51,37 @@ public:
 
     void open_new_connection();
 
-    /*void close_connection(const std::shared_ptr<tcp::socket>& socket);*/
-
-    void close_connection();
-
     void handle_close_connection(const std::shared_ptr<tcp::socket> &socket);
 
     void print_string(const std::string& message);
 
-    void check_if_logging(const std::string &message);
+    /******************* STRINGS METHODS ******************************************************************************/
+
+    std::string handle_read_string(const std::shared_ptr<tcp::socket> &socket);
+
+    void handle_send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message);
+
+    /******************* FILES METHODS ********************************************************************************/
+
+    void handle_send_file(const std::string& file_path, const std::string& command);
+
+    void do_send_file(std::ifstream source_file);
+
+public:
+
+    /******************* CONSTRUCTOR **********************************************************************************/
+
+    Connection(std::string  ip_address, int port_number, std::string base_path);
+
+    /******************* DESTRUCTOR ***********************************************************************************/
+
+    ~Connection();
+
+    /******************* UTILITY METHODS ******************************************************************************/
+
+    /*void close_connection(const std::shared_ptr<tcp::socket>& socket);*/
+
+    void close_connection();
 
     /******************* STRINGS METHODS ******************************************************************************/
 
@@ -76,17 +89,17 @@ public:
 
     /*std::string read_string(const std::shared_ptr<tcp::socket>& socket);*/
 
-    std::string handle_read_string(const std::shared_ptr<tcp::socket> &socket);
-
     std::string read_string_with_deadline(int deadline_seconds);
 
     void send_string(const std::string& message);
 
     /*void send_string(const std::shared_ptr<tcp::socket>& socket, const std::string& message);*/
 
-    void handle_send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message);
+    /******************* LOGIN ****************************************************************************************/
 
-    /******************* FILES METHODS ******************************************************************************/
+    void login(const std::string &username, const std::string &password);
+
+    /******************* FILES METHODS ********************************************************************************/
 
     void remove_file(const std::string& file_path);
 
@@ -94,13 +107,9 @@ public:
 
     void add_file(const std::string& file_path);
 
-    void handle_send_file(const std::string& file_path, const std::string& command);
-
-    void do_send_file(std::ifstream source_file);
-
     void get_file(const std::string &file_path);
 
-    /******************* SERIALIZATION ******************************************************************************/
+    /******************* SERIALIZATION ********************************************************************************/
 
     std::unordered_map<std::string, std::string> get_filesystem_status();
 };

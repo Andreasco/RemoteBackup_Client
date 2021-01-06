@@ -15,7 +15,7 @@ void fileWatcherTest () {
     // Create a Connection
     //Connection conn_("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles");
     Connection conn_("0.0.0.0", 5004, path_to_watch);
-    conn_.send_string("login guido guido.poli");
+    conn_.login("guido", "guido.poli");
     std::cout << conn_.read_string(); // Read server confirm G.R.
 
     if(DEBUG)
@@ -98,7 +98,7 @@ void getFileTest(){
     std::cout << "Do you want to login now?(y/n): ";
     std::getline(std::cin, input);
     if (input == "y") {
-        s.send_string("login guido guido.poli");
+        s.login("guido", "guido.poli");
         std::cout << s.read_string(); // Read server confirm
 
         std::cout << "Do you want to read the file now?(y/n): ";
@@ -127,7 +127,7 @@ void addFileTest(){
     std::cout << "Do you want to login now?(y/n): ";
     std::getline(std::cin, input);
     if (input == "y") {
-        s.send_string("login guido guido.poli");
+        s.login("guido", "guido.poli");
         std::cout << s.read_string(); // Read server confirm
 
         std::cout << "Do you want to send the file now?(y/n): ";
@@ -153,7 +153,7 @@ void getFilesystemStatusTest(){
     std::cout << "Do you want to login now?(y/n): ";
     std::getline(std::cin, input);
     if (input == "y") {
-        s.send_string("login guido guido.poli");
+        s.login("guido", "guido.poli");
         std::cout << s.read_string(); // Read server confirm
 
         std::cout << "Do you want to get the filesystem status now?(y/n): ";
