@@ -13,7 +13,8 @@ void fileWatcherTest () {
     std::cout << "Watching path " << path_to_watch << std::endl;
 
     // Create a Connection
-    Connection conn_("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles");
+    //Connection conn_("0.0.0.0", 5004, "/Users/andreascopp/Desktop/Client-TestFiles");
+    Connection conn_("0.0.0.0", 5004, path_to_watch);
     conn_.send_string("login guido guido.poli");
     std::cout << conn_.read_string(); // Read server confirm G.R.
 
@@ -28,7 +29,7 @@ void fileWatcherTest () {
     fw.initial_check([] (const std::string& file_path, Connection& conn_, FileStatus status) -> void {
         // Process only regular files, all other file types are ignored
 
-        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path)) && status!=FileStatus::erased) {
+        if(!std::filesystem::is_regular_file(std::filesystem::path(file_path)) && status!=FileStatus::missing) {
             return;
         }
 
@@ -61,7 +62,6 @@ void fileWatcherTest () {
         if(!std::filesystem::is_regular_file(std::filesystem::path(file_path)) && status!=FileStatus::erased) {
             return;
         }
-
         switch(status) {
             case FileStatus::created:
                 conn_.add_file(file_path);

@@ -14,8 +14,9 @@ void FileWatcher::start(const std::function<void (std::string, Connection&, File
 
         // Check if a file was deleted
         while (it != paths_.end()) {
+
             if (!std::filesystem::exists(complete_path(it->first))) {
-                action(it->first, conn_, FileStatus::erased);
+                action(complete_path(it->first), conn_, FileStatus::erased);
                 it = paths_.erase(it);
             } else {
                 it++;
@@ -28,12 +29,12 @@ void FileWatcher::start(const std::function<void (std::string, Connection&, File
 
             // File creation
             if(!contains(relative(file.path().string()))) {
-                action(relative(file.path().string()), conn_, FileStatus::created);
+                action(file.path().string(), conn_, FileStatus::created);
                 paths_[relative(file.path().string())] = current_file_checksum;
             } else {
                 // File modification
                 if(!checksums_equal(paths_[relative(file.path().string())], current_file_checksum)) {
-                    action(relative(file.path().string()), conn_, FileStatus::modified);
+                    action(file.path().string(), conn_, FileStatus::modified);
                     paths_[relative(file.path().string())] = current_file_checksum;
                 }
             }
@@ -59,13 +60,13 @@ void FileWatcher::initial_check(const std::function<void (std::string, Connectio
             //FILE PRESENTE SU CLIENT E NON SU SERVER
             if(DEBUG)
                 std::cout << "[DEBUG] [FileWatcher] [initial check] File " << it_client->first << " present on client and not on server" << std::endl;
-            action(it_client->first, conn_, FileStatus::created);
+            action(complete_path(it_client->first), conn_, FileStatus::created);
         } else {
             if(!checksums_equal(it_client->second, server[it_client->first])){
                 //FILE CON INFO DIVERSE
                 if(DEBUG)
                     std::cout << "[DEBUG] [FileWatcher] [initial check] File " << it_client->first << " present on both (but different content)" << std::endl;
-                action(it_client->first, conn_, FileStatus::modified);
+                action(complete_path(it_client->first), conn_, FileStatus::modified);
             } else {
                 //FILE IDENTICI
                 if(DEBUG)
@@ -84,8 +85,9 @@ void FileWatcher::initial_check(const std::function<void (std::string, Connectio
         if (!contains(it_server->first)) {
             if(DEBUG)
                 std::cout << "[DEBUG] [FileWatcher] [initial check] File " << it_server->first << " present on server and not on client" << std::endl;
-            action(it_server->first, conn_, FileStatus::missing);
+            action(complete_path(it_server->first), conn_, FileStatus::missing);
             paths_[it_server->first] = it_server->second;
+
         }
         it_server++;
     }
