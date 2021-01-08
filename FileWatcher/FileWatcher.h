@@ -9,7 +9,6 @@
 #include <filesystem>
 #include <chrono>
 #include <thread>
-#include <unordered_map>
 #include <map>
 #include <string>
 #include <functional>
@@ -26,7 +25,7 @@ public:
     std::string path_to_watch;
     // Time interval at which check for changes
     std::chrono::duration<int, std::milli> delay;
-    std::unordered_map<std::string, std::string> paths_;
+    std::map<std::string, std::string> paths_;
 
     // Keep a record of files from the base directory and their last modification time
     FileWatcher(std::string path_to_watch, std::chrono::duration<int, std::milli> delay, Connection& conn_) : path_to_watch{path_to_watch}, delay{delay}, conn_(conn_) {
@@ -51,7 +50,7 @@ public:
     void initial_check(const std::function<void (std::string, Connection&, FileStatus)> &action);
 
     //for tests
-    std::unordered_map<std::string, std::string> get_map(){
+    std::map<std::string, std::string> get_map(){
         return paths_;
     }
 

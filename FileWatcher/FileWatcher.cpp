@@ -10,14 +10,14 @@ void FileWatcher::start(const std::function<void (std::string, Connection&, File
     while(running_) {
         // Wait for "delay" milliseconds
         std::this_thread::sleep_for(delay);
-        auto it = paths_.begin();
+        auto it = paths_.rbegin();
 
         // Check if a file was deleted
-        while (it != paths_.end()) {
+        while (it != paths_.rend()) {
 
             if (!std::filesystem::exists(complete_path(it->first))) {
                 action(complete_path(it->first), conn_, FileStatus::erased);
-                it = paths_.erase(it);
+                it = decltype(it)(paths_.erase(std::next(it).base()));
             } else {
                 it++;
             }
@@ -85,7 +85,14 @@ void FileWatcher::initial_check(const std::function<void (std::string, Connectio
         if (!contains(it_server->first)) {
             if(DEBUG)
                 std::cout << "[DEBUG] [FileWatcher] [initial check] File " << it_server->first << " present on server and not on client" << std::endl;
-            action(complete_path(it_server->first), conn_, FileStatus::missing);
+            if(it_server->second.empty()){
+                //directory
+                std::filesystem::create_directories(complete_path(it_server->first));
+                std::cout << "[DEBUG] [FileWatcher] [initial check] Directory " << it_server->first << " created!" << std::endl;
+            }else{
+                //file
+                action(complete_path(it_server->first), conn_, FileStatus::missing);
+            }
             paths_[it_server->first] = it_server->second;
 
         }
