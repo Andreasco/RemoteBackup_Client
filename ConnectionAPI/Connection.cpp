@@ -29,44 +29,28 @@ Connection::Connection(std::string ip_address, int port_number, std::string base
 
 Connection::~Connection() {
     if(!closed_) {
-        close_connection();
+        close_connection(false);
     }
 }
 
 /******************* ERROR HANDLING ***********************************************************************************/
 
 void Connection::handle_add_file_error(const std::string &file_path){
-    try {
-        close_connection();
-        open_new_connection();
-        add_file(file_path);
-    }
-    catch(std::exception& e) {
-        if(DEBUG) {
-            std::cout << "[ERROR] Entered in the catch" << std::endl;
-            std::cout << e.what() << std::endl;
-        }
-        std::cout << "Fatal error, please try again." << std::endl;
-        throw e;
-        //TODO check from the slides if I need to throw it
-    }
+    close_connection(false);
+    open_new_connection();
+    add_file(file_path);
 }
 
 void Connection::handle_update_file_error(const std::string &file_path){
-    try {
-        close_connection();
-        open_new_connection();
-        update_file(file_path);
-    }
-    catch(std::exception& e) {
-        if(DEBUG) {
-            std::cout << "[ERROR] Entered in the catch" << std::endl;
-            std::cout << e.what() << std::endl;
-        }
-        std::cout << "Fatal error, please try again." << std::endl;
-        throw e;
-        //TODO check from the slides if I need to throw it
-    }
+    close_connection(false);
+    open_new_connection();
+    update_file(file_path);
+}
+
+void Connection::handle_remove_file_error(const std::string &file_path){
+    close_connection(false);
+    open_new_connection();
+    remove_file(file_path);
 }
 
 /******************* UTILITY METHODS **********************************************************************************/
@@ -98,17 +82,19 @@ void Connection::open_new_connection(){
     login(username_, password_);
 }
 
-void Connection::close_connection() {
-    handle_close_connection(main_socket_);
+void Connection::close_connection(bool comunicate_to_the_server) {
+    handle_close_connection(main_socket_, comunicate_to_the_server);
 }
 
 /*void Connection::close_connection(const std::shared_ptr<tcp::socket> &socket) {
     handle_close_connection(socket);
 }*/
 
-void Connection::handle_close_connection(const std::shared_ptr<tcp::socket> &socket){
-    const std::string message = "close";
-    send_string(message);
+void Connection::handle_close_connection(const std::shared_ptr<tcp::socket> &socket, bool comunicate_to_the_server){
+    if(comunicate_to_the_server) {
+        const std::string message = "close";
+        send_string(message);
+    }
     socket->close();
     closed_ = true;
 }
@@ -183,7 +169,7 @@ void Connection::login(const std::string &username, const std::string &password)
     } catch (std::exception &e) {
         if(DEBUG)
             std::cout << "[ERROR] Login error: " << e.what() << std::endl;
-        std::cout << "There was an error with the server, I'll try to login again in 10 seconds" << std::endl;
+        std::cout << "There was an error with the server, I'll try to login again in 10 seconds." << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
         open_new_connection();
     }
@@ -209,10 +195,9 @@ void Connection::remove_file(const std::string &file_path) {
     } catch (std::exception &e){
         if(DEBUG)
             std::cout << "[ERROR] Remove file error: " << e.what() << std::endl;
-        std::cout << "There was an error with the server, I'll try to remove the file again in 10 seconds" << std::endl;
+        std::cout << "There was an error with the server. I'll try to remove the file again in 10 seconds." << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
-        open_new_connection();
-        remove_file(file_path);
+        handle_remove_file_error(file_path);
     }
 }
 
@@ -224,16 +209,17 @@ void Connection::update_file(const std::string &file_path) {
         if(DEBUG) {
             std::cout << "[ERROR] Update file error: " << e.what() << std::endl;
         }
+        std::cout << e.what() << " I'm trying to recover in 10 seconds." << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
         handle_update_file_error(file_path);
     }
     catch (std::exception& e){
         if(DEBUG) {
             std::cout << "[ERROR] Update file error: " << e.what() << std::endl;
         }
-        std::cout << "There was an error with the server, I'll try to update the file again in 10 seconds" << std::endl;
+        std::cout << "There was an error with the server, I'll try to update the file again in 10 seconds." << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
-        open_new_connection();
-        update_file(file_path);
+        handle_update_file_error(file_path);
     }
 }
 
@@ -245,17 +231,17 @@ void Connection::add_file(const std::string &file_path) {
         if(DEBUG) {
             std::cout << "[ERROR] Add file error: " << e.what() << std::endl;
         }
-        std::cout << "There was an error while reading the file from the disk. I'm trying to recover" << std::endl;
+        std::cout << e.what() << " I'm trying to recover in 10 seconds." << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
         handle_add_file_error(file_path);
     }
     catch (std::exception& e){
         if(DEBUG) {
             std::cout << "[ERROR] Add file error: " << e.what() << std::endl;
         }
-        std::cout << "There was an error with the server, I'll try to send the file again in 10 seconds" << std::endl;
+        std::cout << "There was an error with the server, I'll try to send the file again in 10 seconds." << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
-        open_new_connection();
-        add_file(file_path);
+        handle_add_file_error(file_path);
     }
 }
 
@@ -351,15 +337,15 @@ void Connection::do_send_file(const std::shared_ptr<std::ifstream>& source_file)
         }*/
 
         if(bytes_read_from_file<=0) {
-            std::cout << "[ERROR] Read file to send error" << std::endl;
-            throw std::runtime_error("Read file to send error");
+            //std::cout << "[ERROR] Read file to send error" << std::endl;
+            throw std::runtime_error("Read file to send error.");
         }
 
         boost::asio::write(*main_socket_, boost::asio::buffer(buf.c_array(), source_file->gcount()),
                            boost::asio::transfer_all(), error);
         if(error) {
-            std::cout << "[ERROR] Send file error: " << error << std::endl;
-            throw std::runtime_error("Send file error");
+            //std::cout << "[ERROR] Send file error: " << error << std::endl;
+            throw std::runtime_error("Send file error.");
         }
 
         bytes_sent += bytes_read_from_file;

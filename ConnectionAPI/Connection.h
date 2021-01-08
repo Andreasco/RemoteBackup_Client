@@ -42,6 +42,8 @@ private:
 
     void handle_update_file_error(const std::string &file_path);
 
+    void handle_remove_file_error(const std::string &file_path);
+
     /******************* UTILITY METHODS ******************************************************************************/
 
     static void print_percentage(float percent);
@@ -50,7 +52,7 @@ private:
 
     void open_new_connection();
 
-    void handle_close_connection(const std::shared_ptr<tcp::socket> &socket);
+    void handle_close_connection(const std::shared_ptr<tcp::socket> &socket, bool comunicate_to_the_server);
 
     void print_string(const std::string& message);
 
@@ -80,7 +82,7 @@ public:
 
     /*void close_connection(const std::shared_ptr<tcp::socket>& socket);*/
 
-    void close_connection();
+    void close_connection(bool comunicate_to_the_server);
 
     /******************* STRINGS METHODS ******************************************************************************/
 
