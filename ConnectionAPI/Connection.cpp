@@ -8,11 +8,10 @@
 
 Connection::Connection(std::string ip_address, int port_number, std::string base_path) try:
     io_context_(),
-    read_timer_(io_context_),
     server_ip_address_(std::move(ip_address)),
     server_port_number_(port_number),
     base_path_(std::move(base_path)),
-    reading_(false), closed_(false) {
+    closed_(false) {
         main_socket_ = std::make_shared<tcp::socket>(io_context_);
         main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
     }
@@ -186,7 +185,7 @@ void Connection::login(const std::string &username, const std::string &password)
             std::cout << "[ERROR] Login error: " << e.what() << std::endl;
         std::cout << "There was an error with the server, I'll try to login again in 10 seconds" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
-        login(username, password);
+        open_new_connection();
     }
 }
 
@@ -212,6 +211,7 @@ void Connection::remove_file(const std::string &file_path) {
             std::cout << "[ERROR] Remove file error: " << e.what() << std::endl;
         std::cout << "There was an error with the server, I'll try to remove the file again in 10 seconds" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
+        open_new_connection();
         remove_file(file_path);
     }
 }
@@ -232,6 +232,7 @@ void Connection::update_file(const std::string &file_path) {
         }
         std::cout << "There was an error with the server, I'll try to update the file again in 10 seconds" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
+        open_new_connection();
         update_file(file_path);
     }
 }
@@ -253,6 +254,7 @@ void Connection::add_file(const std::string &file_path) {
         }
         std::cout << "There was an error with the server, I'll try to send the file again in 10 seconds" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
+        open_new_connection();
         add_file(file_path);
     }
 }
@@ -460,6 +462,7 @@ void Connection::get_file(const std::string &file_path) {
         }
         std::cout << "There was an error with the server, I'll try to retreive the file again in 10 seconds" << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
+        open_new_connection();
         get_file(file_path);
     }
 }
