@@ -8,6 +8,7 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
+#include <filesystem>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/serialization/unordered_map.hpp>
@@ -65,7 +66,7 @@ private:
 
     void handle_send_file(const std::string& file_path, const std::string& command);
 
-    void do_send_file(std::ifstream source_file);
+    void do_send_file(const std::shared_ptr<std::ifstream>& source_file);
 
 public:
 
@@ -89,7 +90,7 @@ public:
 
     /*std::string read_string(const std::shared_ptr<tcp::socket>& socket);*/
 
-    std::string read_string_with_deadline(int deadline_seconds);
+    /*std::string read_string_with_deadline(int deadline_seconds);*/
 
     void send_string(const std::string& message);
 

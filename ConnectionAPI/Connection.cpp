@@ -7,13 +7,13 @@
 /******************* CONSTRUCTOR **************************************************************************************/
 
 Connection::Connection(std::string ip_address, int port_number, std::string base_path) try:
-        io_context_(),
-        read_timer_(io_context_),
-        server_ip_address_(std::move(ip_address)),
-        server_port_number_(port_number),
-        base_path_(std::move(base_path)),
-        reading_(false), closed_(false) {
-        main_socket_ = std::make_unique<tcp::socket>(io_context_);
+    io_context_(),
+    read_timer_(io_context_),
+    server_ip_address_(std::move(ip_address)),
+    server_port_number_(port_number),
+    base_path_(std::move(base_path)),
+    reading_(false), closed_(false) {
+        main_socket_ = std::make_shared<tcp::socket>(io_context_);
         main_socket_->connect(tcp::endpoint(boost::asio::ip::address::from_string(server_ip_address_), server_port_number_));
     }
     catch(std::exception& e) {
@@ -150,7 +150,7 @@ std::string Connection::handle_read_string(const std::shared_ptr<tcp::socket> &s
     return "-1";
 }
 
-std::string Connection::read_string_with_deadline(int deadline_seconds) {
+/*std::string Connection::read_string_with_deadline(int deadline_seconds) {
     boost::asio::streambuf buf;
     boost::asio::async_read_until(*main_socket_, buf, "\n", [this](boost::system::error_code error, std::size_t bytes_read) -> std::string{
         reading_ = true;
@@ -193,7 +193,7 @@ std::string Connection::read_string_with_deadline(int deadline_seconds) {
 
     reading_ = false; // In this way I don't risk that the main thread get stuck for some reason on line 135 when reading_ = true and resume his workflow after the end of the reading_ thread where I should set reading_ = false;
     return "-1"; // I shouldn't get here
-}
+}*/
 
 void Connection::send_string(const std::string &message) {
     handle_send_string(main_socket_, message);
@@ -251,11 +251,11 @@ void Connection::remove_file(const std::string &file_path) {
     oss << "\n";
     send_string(oss.str());
 
-    /*//IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
+    //IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
     // Read the confirm of command receipt from the server
-    print_string(read_string());*/
+    print_string(read_string());
 
-    std::string response = read_string_with_deadline(3);
+    /*std::string response = read_string_with_deadline(3);
     if(response == "-1" || response.find("[SERVER SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
         //std::this_thread::sleep_for(std::chrono::seconds(5));
         if(DEBUG) {
@@ -263,7 +263,7 @@ void Connection::remove_file(const std::string &file_path) {
         }
         //FIXME this fires everytime
         //remove_file(file_path);
-    }
+    }*/
 
     // Read the confirm of receipt from the server
     print_string(read_string());
@@ -295,8 +295,9 @@ void Connection::add_file(const std::string &file_path) {
 
 void Connection::handle_send_file(const std::string &file_path, const std::string &command) {
     // Open the file to send
-    std::ifstream source_file(file_path, std::ios_base::binary | std::ios_base::ate);
-    if(!source_file) {
+    std::shared_ptr<std::ifstream> source_file = std::make_shared<std::ifstream>(file_path, std::ios_base::binary | std::ios_base::ate);
+
+    if(!source_file->is_open()) {
         //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
         print_string("[ERROR] Failed to open " + file_path);
 
@@ -307,8 +308,10 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
         do {
             print_string("Do you want to try to open it again? (y/n)");
             std::getline(std::cin, input);
-            if (input == "y")
-                handle_send_file(file_path, command);
+            if (input == "y"){
+                while(!source_file->is_open())
+                    source_file = std::make_shared<std::ifstream>(file_path, std::ios_base::binary | std::ios_base::ate);
+            }
             else if (input == "n") {
                 std::ostringstream oss;
                 oss << "Ok, the file: ";
@@ -322,7 +325,7 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     }
 
     std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
-    size_t file_size = source_file.tellg();
+    size_t file_size = source_file->tellg();
     std::string file_size_readable = file_size_to_readable(file_size);
 
     if(DEBUG) {
@@ -339,11 +342,11 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     oss << file_size;
     send_string(oss.str());
 
-    /*//IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
+    //IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
     // Read the confirm of command receipt from the server
-    print_string(read_string());*/
+    print_string(read_string());
 
-    std::string response = read_string_with_deadline(3);
+    /*std::string response = read_string_with_deadline(3);
     if(response == "-1" || response.find("[SERVER_SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
         //std::this_thread::sleep_for(std::chrono::seconds(5));
         if(DEBUG) {
@@ -351,9 +354,11 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
         }
         //FIXME this fires everytime and it would break the server, i need to close the connection and open another one
         //handle_send_file(file_path, command);
-    }
+    }*/
 
-    do_send_file(std::move(source_file)); // May throw runtime_error
+    do_send_file(source_file); // May throw runtime_error
+
+    source_file->close();
 
     // Read the confirm of file receipt from the server
     print_string(read_string());
@@ -362,14 +367,14 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     print_string(std::string("\n") + "[INFO] File " + file_path + " sent successfully!");
 }
 
-void Connection::do_send_file(std::ifstream source_file) {
+void Connection::do_send_file(const std::shared_ptr<std::ifstream>& source_file) {
     // This buffer's size determines the MTU, therefore how many bytes at time get copied
     // from source file to such buffer, which means how many bytes get sent everytime
     boost::array<char, 1024> buf{};
     boost::system::error_code error;
 
-    size_t file_size = source_file.tellg();
-    source_file.seekg(0);
+    size_t file_size = source_file->tellg();
+    source_file->seekg(0);
 
     if(DEBUG) {
         std::cout << "[DEBUG] Start sending file content" << std::endl;
@@ -379,10 +384,10 @@ void Connection::do_send_file(std::ifstream source_file) {
     float percent = 0;
     print_percentage(percent);
 
-    while(!source_file.eof()) {
-        source_file.read(buf.c_array(), (std::streamsize)buf.size());
+    while(!source_file->eof()) {
+        source_file->read(buf.c_array(), (std::streamsize)buf.size());
 
-        int bytes_read_from_file = source_file.gcount(); //int is fine because i read at most buf's size, 1024 in this case
+        int bytes_read_from_file = source_file->gcount(); //int is fine because i read at most buf's size, 1024 in this case
 
         // If uncommented the progress is printed in multiple lines succeded from this line
         // Only use to debug file reading_ otherwise the progress gets unreadable
@@ -395,7 +400,7 @@ void Connection::do_send_file(std::ifstream source_file) {
             throw std::runtime_error("Read file to send error");
         }
 
-        boost::asio::write(*main_socket_, boost::asio::buffer(buf.c_array(), source_file.gcount()),
+        boost::asio::write(*main_socket_, boost::asio::buffer(buf.c_array(), source_file->gcount()),
                            boost::asio::transfer_all(), error);
         if(error) {
             std::cout << "[ERROR] Send file error: " << error << std::endl;
@@ -407,18 +412,19 @@ void Connection::do_send_file(std::ifstream source_file) {
         percent = std::ceil((100.0 * bytes_sent) / file_size);
         print_percentage(percent);
     }
-
-    //TODO cercare di sportarlo fuori dalla funzione
-    source_file.close();
 }
 
 void Connection::get_file(const std::string &file_path) {
     std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
+    std::string path_to_directory(file_path.substr(0, file_path.find_last_of('/')));
 
     if(DEBUG) {
         print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
         print_string("[DEBUG] File path: " + file_path);
+        print_string("[DEBUG] Path to directory: " + path_to_directory);
     }
+
+    std::filesystem::create_directories(path_to_directory);
 
     // Open the file to save
     std::ofstream output_file(file_path, std::ios_base::binary);

@@ -176,6 +176,13 @@ void getFilesystemStatusTest(){
     }
 }
 
+void prova(){
+    std::string file_path = "/Users/andreascopp/Desktop/Client-TestFiles/fol/fol2/prova.txt";
+
+    std::string path_to_directory(file_path.substr(0, file_path.find_last_of('/')));
+    std::filesystem::create_directories(path_to_directory);
+}
+
 int main() {
     std::cout << "Menu options:" << std::endl;
 
@@ -217,6 +224,9 @@ int main() {
         case 5:
             std::cout << "Get Filesystem Status Test Initialized" << std::endl;
             getFilesystemStatusTest();
+            break;
+        case 6:
+            prova();
             break;
         default:
             std::cout << "Error!" << std::endl;
