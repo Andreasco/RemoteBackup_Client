@@ -130,70 +130,18 @@ std::string Connection::read_string() {
 }*/
 
 std::string Connection::handle_read_string(const std::shared_ptr<tcp::socket> &socket) {
-    boost::system::error_code error;
     boost::asio::streambuf buf;
-    boost::asio::read_until(*socket, buf, "\n", error);
-    if(!error) {
-        std::string data = boost::asio::buffer_cast<const char*>(buf.data());
+    boost::asio::read_until(*socket, buf, "\n");
 
-        if(DEBUG) {
-            //std::cout << "[DEBUG] Receive succeded" << std::endl;
-            print_string("[DEBUG] Client received: " + data);
-        }
+    std::string data = boost::asio::buffer_cast<const char*>(buf.data());
 
-        return data;
+    if(DEBUG) {
+        //std::cout << "[DEBUG] Receive succeded" << std::endl;
+        print_string("[DEBUG] Client received: " + data);
     }
-    else {
-        //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
-        print_string("[ERROR] Receive failed: " + error.message());
-    }
-    return "-1";
+
+    return data;
 }
-
-/*std::string Connection::read_string_with_deadline(int deadline_seconds) {
-    boost::asio::streambuf buf;
-    boost::asio::async_read_until(*main_socket_, buf, "\n", [this](boost::system::error_code error, std::size_t bytes_read) -> std::string{
-        reading_ = true;
-        read_timer_.cancel(); // Cancel the timer because I started reading_
-
-        boost::asio::streambuf buf;
-        if(!error) {
-            if(DEBUG) {
-                //std::cout << "[DEBUG] Receive succeded" << std::endl;
-                print_string("[DEBUG] Receive succeded");
-            }
-
-            std::string data = boost::asio::buffer_cast<const char*>(buf.data());
-            return data;
-        }
-        else {
-            //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
-            print_string("[ERROR] Receive failed: " + error.message());
-        }
-        return "-1";
-    });
-
-    boost::system::error_code err;
-    read_timer_.expires_from_now(boost::posix_time::seconds(deadline_seconds));
-    read_timer_.wait(err);
-    if(!err) {
-        if(!reading_) {
-            if (DEBUG) {
-                print_string("[DEBUG] Read timeout occurred");
-            }
-
-            main_socket_->cancel();
-            return "-1";
-        }
-    }
-    else {
-        //std::cout << "[ERROR] Receive failed: " << error.message() << std::endl;
-        print_string("[ERROR] Timer error: " + err.message());
-    }
-
-    reading_ = false; // In this way I don't risk that the main thread get stuck for some reason on line 135 when reading_ = true and resume his workflow after the end of the reading_ thread where I should set reading_ = false;
-    return "-1"; // I shouldn't get here
-}*/
 
 void Connection::send_string(const std::string &message) {
     handle_send_string(main_socket_, message);
@@ -210,17 +158,11 @@ void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, 
     }
 
     const std::string msg = message + "\n";
-    boost::system::error_code error;
-    boost::asio::write(*socket, boost::asio::buffer(msg), error);
-    if(!error) {
-        if(DEBUG) {
-            //std::cout << "[DEBUG] Client sent: " << message << std::endl;
-            print_string("[DEBUG] Client sent: " + message);
-        }
-    }
-    else {
-        //std::cout << "[ERROR] In function: " << __FUNCTION__ << " Send failed: " << error.message() << std::endl;
-        print_string("[ERROR] In function: " + std::string(__FUNCTION__) + " Send failed: " + error.message());
+    boost::asio::write(*socket, boost::asio::buffer(msg));
+
+    if(DEBUG) {
+        //std::cout << "[DEBUG] Client sent: " << message << std::endl;
+        print_string("[DEBUG] Client sent: " + message);
     }
 }
 
@@ -237,36 +179,41 @@ void Connection::login(const std::string &username, const std::string &password)
     oss << " ";
     oss << password;
 
-    send_string(oss.str());
+    try {
+        send_string(oss.str());
+    } catch (std::exception &e) {
+        if(DEBUG)
+            std::cout << "[ERROR] Login error: " << e.what() << std::endl;
+        std::cout << "There was an error with the server, I'll try to login again in 10 seconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        login(username, password);
+    }
 }
 
 /******************* FILES METHODS ************************************************************************************/
 
 void Connection::remove_file(const std::string &file_path) {
-    std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
+    try {
+        std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
 
-    std::ostringstream oss;
-    oss << "removeFile ";
-    oss << cleaned_file_path;
-    oss << "\n";
-    send_string(oss.str());
+        std::ostringstream oss;
+        oss << "removeFile ";
+        oss << cleaned_file_path;
+        oss << "\n";
+        send_string(oss.str());
 
-    //IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
-    // Read the confirm of command receipt from the server
-    print_string(read_string());
+        // Read the confirm of command receipt from the server
+        print_string(read_string());
 
-    /*std::string response = read_string_with_deadline(3);
-    if(response == "-1" || response.find("[SERVER SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
-        //std::this_thread::sleep_for(std::chrono::seconds(5));
-        if(DEBUG) {
-            std::cout << "[DEBUG] Server error or no confirmation received" << std::endl;
-        }
-        //FIXME this fires everytime
-        //remove_file(file_path);
-    }*/
-
-    // Read the confirm of receipt from the server
-    print_string(read_string());
+        // Read the confirm of receipt from the server
+        print_string(read_string());
+    } catch (std::exception &e){
+        if(DEBUG)
+            std::cout << "[ERROR] Remove file error: " << e.what() << std::endl;
+        std::cout << "There was an error with the server, I'll try to remove the file again in 10 seconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        remove_file(file_path);
+    }
 }
 
 void Connection::update_file(const std::string &file_path) {
@@ -275,9 +222,17 @@ void Connection::update_file(const std::string &file_path) {
     }
     catch (std::runtime_error& e){
         if(DEBUG) {
-            std::cout << e.what() << std::endl;
+            std::cout << "[ERROR] Update file error: " << e.what() << std::endl;
         }
         handle_update_file_error(file_path);
+    }
+    catch (std::exception& e){
+        if(DEBUG) {
+            std::cout << "[ERROR] Update file error: " << e.what() << std::endl;
+        }
+        std::cout << "There was an error with the server, I'll try to update the file again in 10 seconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        update_file(file_path);
     }
 }
 
@@ -287,9 +242,18 @@ void Connection::add_file(const std::string &file_path) {
     }
     catch (std::runtime_error& e){
         if(DEBUG) {
-            std::cout << e.what() << std::endl;
+            std::cout << "[ERROR] Add file error: " << e.what() << std::endl;
         }
+        std::cout << "There was an error while reading the file from the disk. I'm trying to recover" << std::endl;
         handle_add_file_error(file_path);
+    }
+    catch (std::exception& e){
+        if(DEBUG) {
+            std::cout << "[ERROR] Add file error: " << e.what() << std::endl;
+        }
+        std::cout << "There was an error with the server, I'll try to send the file again in 10 seconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        add_file(file_path);
     }
 }
 
@@ -342,19 +306,8 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     oss << file_size;
     send_string(oss.str());
 
-    //IF THE NEXT BLOCK DOESN'T WORK, COMMENT IT AND UNCOMMENT THIS
     // Read the confirm of command receipt from the server
     print_string(read_string());
-
-    /*std::string response = read_string_with_deadline(3);
-    if(response == "-1" || response.find("[SERVER_SUCCESS]") == std::string::npos){ // If server response doesn't contain [SERVER SUCCESS] or the deadline is passed
-        //std::this_thread::sleep_for(std::chrono::seconds(5));
-        if(DEBUG) {
-            std::cout << "[DEBUG] Server error or no confirmation received" << std::endl;
-        }
-        //FIXME this fires everytime and it would break the server, i need to close the connection and open another one
-        //handle_send_file(file_path, command);
-    }*/
 
     do_send_file(source_file); // May throw runtime_error
 
@@ -427,7 +380,7 @@ void Connection::get_file(const std::string &file_path) {
     std::filesystem::create_directories(path_to_directory);
 
     // Open the file to save
-    std::ofstream output_file(file_path, std::ios_base::binary);
+    std::shared_ptr<std::ofstream> output_file = std::make_shared<std::ofstream>(file_path, std::ios_base::binary);
     if(!output_file) {
         //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
         print_string("[ERROR] Failed to save " + file_path);
@@ -437,8 +390,10 @@ void Connection::get_file(const std::string &file_path) {
         do {
             print_string("Do you want to try to save it again? (y/n)");
             std::getline(std::cin, input);
-            if (input == "y")
-                get_file(file_path);
+            if (input == "y") {
+                while (!output_file->is_open())
+                    output_file = std::make_shared<std::ofstream>(file_path, std::ios_base::binary);
+            }
             else if (input == "n") {
                 std::ostringstream oss2;
                 oss2 << "Ok, the file: ";
@@ -454,7 +409,6 @@ void Connection::get_file(const std::string &file_path) {
     // Probabilmente il try non serve
     try {
         boost::array<char, 1024> buf{};
-        boost::system::error_code error;
         boost::asio::streambuf request_buf;
 
         // Send the command to request the file
@@ -480,19 +434,14 @@ void Connection::get_file(const std::string &file_path) {
         }
 
         for(;;) {
-            size_t len = main_socket_->read_some(boost::asio::buffer(buf), error);
+            size_t len = main_socket_->read_some(boost::asio::buffer(buf));
             if (len>0)
-                output_file.write(buf.c_array(), (std::streamsize)len);
-            if (output_file.tellp() == (std::fstream::pos_type)(std::streamsize)file_size)
+                output_file->write(buf.c_array(), (std::streamsize)len);
+            if (output_file->tellp() == (std::fstream::pos_type)(std::streamsize)file_size)
                 break; // File was received
-            if (error){
-                std::cout << "[ERROR] Save file error: " << error << std::endl;
-                //TODO error handling
-                break;
-            }
         }
 
-        int bytes_received = output_file.tellp();
+        int bytes_received = output_file->tellp();
 
         if(DEBUG) {
             std::cout << "[DEBUG] Received " << bytes_received << " bytes." << std::endl;
@@ -502,10 +451,16 @@ void Connection::get_file(const std::string &file_path) {
             std::cout << "[ERROR] File size and bytes receveid DOES NOT correspond!" << std::endl;
             std::cout << "File size: " << file_size << std::endl;
             std::cout << "Bytes received: " << bytes_received << std::endl;
+            throw std::runtime_error("File not received correctly");
         }
     }
-    catch(std::exception& e) {
-        std::cout << e.what() << std::endl;
+    catch (std::exception& e){
+        if(DEBUG) {
+            std::cout << "[ERROR] Save file error: " << e.what() << std::endl;
+        }
+        std::cout << "There was an error with the server, I'll try to retreive the file again in 10 seconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        get_file(file_path);
     }
 }
 

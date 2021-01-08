@@ -32,8 +32,6 @@ private:
     std::string username_;
     std::string password_;
 
-    boost::asio::deadline_timer read_timer_;
-    bool reading_;
     bool closed_;
 
     std::mutex mutex_;
@@ -89,8 +87,6 @@ public:
     std::string read_string();
 
     /*std::string read_string(const std::shared_ptr<tcp::socket>& socket);*/
-
-    /*std::string read_string_with_deadline(int deadline_seconds);*/
 
     void send_string(const std::string& message);
 
