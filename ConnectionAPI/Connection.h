@@ -34,8 +34,6 @@ private:
 
     bool closed_;
 
-    std::mutex mutex_;
-
     /******************* ERROR HANDLING ******************************************************************************/
 
     void handle_add_file_error(const std::string &file_path);
@@ -53,8 +51,6 @@ private:
     void open_new_connection();
 
     void handle_close_connection(const std::shared_ptr<tcp::socket> &socket, bool comunicate_to_the_server);
-
-    void print_string(const std::string& message);
 
     /******************* STRINGS METHODS ******************************************************************************/
 

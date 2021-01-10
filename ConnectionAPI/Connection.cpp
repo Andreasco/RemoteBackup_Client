@@ -66,9 +66,18 @@ void Connection::handle_update_file_error(const std::string &file_path){
 }
 
 void Connection::handle_remove_file_error(const std::string &file_path){
-    close_connection(false);
-    open_new_connection();
-    remove_file(file_path);
+    try{ //for open_new_connection
+        close_connection(false);
+        open_new_connection();
+        remove_file(file_path);
+    }
+    catch(std::exception &e){
+        if(DEBUG) {
+            std::cout << "[ERROR] Open new connection error: " << e.what() << std::endl;
+        }
+        std::cout << "The server is still down, I can't remove the file right now." << std::endl;
+        close_connection(false);
+    }
 }
 
 /******************* UTILITY METHODS **********************************************************************************/
@@ -117,11 +126,6 @@ void Connection::handle_close_connection(const std::shared_ptr<tcp::socket> &soc
     closed_ = true;
 }
 
-void Connection::print_string(const std::string &message) {
-    std::lock_guard lg (mutex_);
-    std::cout << message << std::endl;
-}
-
 /******************* STRINGS METHODS **********************************************************************************/
 
 std::string Connection::read_string() {
@@ -139,8 +143,7 @@ std::string Connection::handle_read_string(const std::shared_ptr<tcp::socket> &s
     std::string data = boost::asio::buffer_cast<const char*>(buf.data());
 
     if(DEBUG) {
-        //std::cout << "[DEBUG] Receive succeded" << std::endl;
-        print_string("[DEBUG] Client received: " + data);
+        std::cout << "[DEBUG] Client received: " + data << std::endl;
     }
 
     return data;
@@ -156,16 +159,14 @@ void Connection::send_string(const std::string &message) {
 
 void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, const std::string &message) {
     if(DEBUG) {
-        //std::cout << "[DEBUG] Sending string: " << message << std::endl;
-        print_string("[DEBUG] Sending string: " + message);
+        std::cout << "[DEBUG] Sending string: " << message << std::endl;
     }
 
     const std::string msg = message + "\n";
     boost::asio::write(*socket, boost::asio::buffer(msg));
 
     if(DEBUG) {
-        //std::cout << "[DEBUG] Client sent: " << message << std::endl;
-        print_string("[DEBUG] Client sent: " + message);
+        std::cout << "[DEBUG] Client sent: " << message << std::endl;
     }
 }
 
@@ -206,10 +207,10 @@ void Connection::remove_file(const std::string &file_path) {
         send_string(oss.str());
 
         // Read the confirm of command receipt from the server
-        print_string(read_string());
+        //std::cout << read_string() << std::endl;
 
         // Read the confirm of receipt from the server
-        print_string(read_string());
+        //std::cout << read_string() << std::endl;
     } catch (std::exception &e){
         if(DEBUG)
             std::cout << "[ERROR] Remove file error: " << e.what() << std::endl;
@@ -268,15 +269,14 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     std::shared_ptr<std::ifstream> source_file = std::make_shared<std::ifstream>(file_path, std::ios_base::binary | std::ios_base::ate);
 
     if(!source_file->is_open()) {
-        //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
-        print_string("[ERROR] Failed to open " + file_path);
+        std::cout << "[ERROR] Failed to open " << file_path << std::endl;
 
         //TODO try to handle it throwing an exception and catching it outside, I probably need to define a custom exception (it may be a struct)
 
         // Error handling
         std::string input;
         do {
-            print_string("Do you want to try to open it again? (y/n)");
+            std::cout << "Do you want to try to open it again? (y/n)" << std::endl;
             std::getline(std::cin, input);
             if (input == "y"){
                 while(!source_file->is_open())
@@ -287,7 +287,7 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
                 oss << "Ok, the file: ";
                 oss << file_path;
                 oss << " won't be included in the backup";
-                print_string(oss.str());
+                std::cout << oss.str() << std::endl;
 
                 return;
             }
@@ -299,10 +299,8 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     std::string file_size_readable = file_size_to_readable(file_size);
 
     if(DEBUG) {
-        //std::cout << "[DEBUG] " << file_path << " size is: " << file_size_readable << std::endl;
-        print_string("[DEBUG] " + file_path + " size is: " + file_size_readable);
-        //std::cout << "[DEBUG] Cleaned file path: " << cleaned_file_path << std::endl;
-        print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
+        std::cout << "[DEBUG] " << file_path << " size is: " << file_size_readable << std::endl;
+        std::cout << "[DEBUG] Cleaned file path: " << cleaned_file_path << std::endl;
     }
 
     std::ostringstream oss;
@@ -313,17 +311,17 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     send_string(oss.str());
 
     // Read the confirm of command receipt from the server
-    print_string(read_string());
+    std::cout << read_string() << std::endl;
 
     do_send_file(source_file); // May throw runtime_error
 
     source_file->close();
 
     // Read the confirm of file receipt from the server
-    print_string(read_string());
+    std::cout << read_string() << std::endl;
 
     //std::cout << "\n" << "[INFO] File " << file_path << " sent successfully!" << std::endl;
-    print_string(std::string("\n") + "[INFO] File " + file_path + " sent successfully!");
+    std::cout << std::string("\n") << "[INFO] File " << file_path << " sent successfully!" << std::endl;
 }
 
 void Connection::do_send_file(const std::shared_ptr<std::ifstream>& source_file) {
@@ -378,9 +376,9 @@ void Connection::get_file(const std::string &file_path) {
     std::string path_to_directory(file_path.substr(0, file_path.find_last_of('/')));
 
     if(DEBUG) {
-        print_string("[DEBUG] Cleaned file path: " + cleaned_file_path);
-        print_string("[DEBUG] File path: " + file_path);
-        print_string("[DEBUG] Path to directory: " + path_to_directory);
+        std::cout << "[DEBUG] Cleaned file path: " << cleaned_file_path << std::endl;
+        std::cout << "[DEBUG] File path: " << file_path << std::endl;
+        std::cout << "[DEBUG] Path to directory: " << path_to_directory << std::endl;
     }
 
     std::filesystem::create_directories(path_to_directory);
@@ -389,12 +387,12 @@ void Connection::get_file(const std::string &file_path) {
     std::shared_ptr<std::ofstream> output_file = std::make_shared<std::ofstream>(file_path, std::ios_base::binary);
     if(!output_file) {
         //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
-        print_string("[ERROR] Failed to save " + file_path);
+        std::cout << "[ERROR] Failed to save " << file_path << std::endl;
 
         // Error handling
         std::string input;
         do {
-            print_string("Do you want to try to save it again? (y/n)");
+            std::cout << "Do you want to try to save it again? (y/n)" << std::endl;
             std::getline(std::cin, input);
             if (input == "y") {
                 while (!output_file->is_open())
@@ -405,7 +403,7 @@ void Connection::get_file(const std::string &file_path) {
                 oss2 << "Ok, the file: ";
                 oss2 << file_path;
                 oss2 << " won't be retreived from the server";
-                print_string(oss2.str());
+                std::cout << oss2.str() << std::endl;
 
                 return;
             }
@@ -436,7 +434,7 @@ void Connection::get_file(const std::string &file_path) {
             oss2 << "[DEBUG] File size: ";
             oss2 << file_size;
             oss2 << " bytes";
-            print_string(oss2.str());
+            std::cout << oss2.str() << std::endl;
         }
 
         for(;;) {
