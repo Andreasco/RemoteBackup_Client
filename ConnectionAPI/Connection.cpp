@@ -36,15 +36,33 @@ Connection::~Connection() {
 /******************* ERROR HANDLING ***********************************************************************************/
 
 void Connection::handle_add_file_error(const std::string &file_path){
-    close_connection(false);
-    open_new_connection();
-    add_file(file_path);
+    try{ //for open_new_connection
+        close_connection(false);
+        open_new_connection();
+        add_file(file_path);
+    }
+    catch(std::exception &e){
+        if(DEBUG) {
+            std::cout << "[ERROR] Open new connection error: " << e.what() << std::endl;
+        }
+        std::cout << "The server is still down, I can't go on with the backup." << std::endl;
+        close_connection(false);
+    }
 }
 
 void Connection::handle_update_file_error(const std::string &file_path){
-    close_connection(false);
-    open_new_connection();
-    update_file(file_path);
+    try{ //for open_new_connection
+        close_connection(false);
+        open_new_connection();
+        update_file(file_path);
+    }
+    catch(std::exception &e){
+        if(DEBUG) {
+            std::cout << "[ERROR] Open new connection error: " << e.what() << std::endl;
+        }
+        std::cout << "The server is still down, I can't go on with the backup." << std::endl;
+        close_connection(false);
+    }
 }
 
 void Connection::handle_remove_file_error(const std::string &file_path){
