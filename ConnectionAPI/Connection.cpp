@@ -45,7 +45,7 @@ void Connection::handle_add_file_error(const std::string &file_path){
         if(DEBUG) {
             std::cout << "[ERROR] Open new connection error: " << e.what() << std::endl;
         }
-        std::cout << "The server is still down, I can't go on with the backup." << std::endl;
+        std::cout << "The server is still down, I can't add the file right now." << std::endl;
         close_connection(false);
     }
 }
@@ -60,7 +60,7 @@ void Connection::handle_update_file_error(const std::string &file_path){
         if(DEBUG) {
             std::cout << "[ERROR] Open new connection error: " << e.what() << std::endl;
         }
-        std::cout << "The server is still down, I can't go on with the backup." << std::endl;
+        std::cout << "The server is still down, I can't update the file right now." << std::endl;
         close_connection(false);
     }
 }
