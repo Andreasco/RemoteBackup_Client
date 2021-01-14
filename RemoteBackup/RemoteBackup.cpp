@@ -26,14 +26,14 @@ void RemoteBackup(){
 
     Connection conn_("0.0.0.0", 5004, path_to_watch);
     while(!conn_.login(username, password)){
-        std::cout << conn_.read_string();
+        std::cout << "[ERROR] Incorrect username or password" <<std::endl;
         std::cout << "Username: ";
         std::cin >> username;
 
         std::cout << "Password: ";
         std::cin >> password;
     }
-    std::cout << conn_.read_string();
+    std::cout << "Login successful!" << std::endl;
 
 
     if(DEBUG)
