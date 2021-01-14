@@ -172,7 +172,7 @@ void Connection::handle_send_string(const std::shared_ptr<tcp::socket> &socket, 
 
 /******************* LOGIN ********************************************************************************************/
 
-void Connection::login(const std::string &username, const std::string &password){
+bool Connection::login(const std::string &username, const std::string &password){
     // If I'm logging in, I need to save the credentials to reopen a connection in case of errors
     username_ = username;
     password_ = password;
@@ -185,6 +185,8 @@ void Connection::login(const std::string &username, const std::string &password)
 
     try {
         send_string(oss.str());
+        std::string response = read_string();
+        return response.find("[SERVER_SUCCESS]") != std::string::npos;
     } catch (std::exception &e) {
         if(DEBUG)
             std::cout << "[ERROR] Login error: " << e.what() << std::endl;

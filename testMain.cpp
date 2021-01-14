@@ -105,7 +105,7 @@ void getFileTest(){
         if (input == "y") {
             s.get_file("/Appunti_di_Topologia_(Ferrarotti).pdf");
 
-            s.close_connection();
+            s.close_connection(true);
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
@@ -137,7 +137,7 @@ void addFileTest(){
 
             // In order to wait the sending of the files, since they are made by different threads
             //std::this_thread::sleep_for(std::chrono::seconds(5));
-            s.close_connection();
+            s.close_connection(true);
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;
@@ -167,7 +167,7 @@ void getFilesystemStatusTest(){
                               std::cout << "{" << p.first << ": " << p.second << "}\n";
                           });
 
-            s.close_connection();
+            s.close_connection(true);
         }
         else if (input == "n"){
             std::cout << "Ok bye!" << std::endl;

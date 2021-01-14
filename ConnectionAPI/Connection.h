@@ -92,7 +92,7 @@ public:
 
     /******************* LOGIN ****************************************************************************************/
 
-    void login(const std::string &username, const std::string &password);
+    bool login(const std::string &username, const std::string &password);
 
     /******************* FILES METHODS ********************************************************************************/
 
