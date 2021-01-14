@@ -104,3 +104,4 @@ bool map_contains(std::unordered_map<std::string, std::string> &file_map, const 
     auto el = file_map.find(key);
     return el != file_map.end();
 }
+

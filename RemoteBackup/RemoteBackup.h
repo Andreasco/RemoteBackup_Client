@@ -1,0 +1,10 @@
+//
+// Created by cbrugo on 14/01/21.
+//
+
+#ifndef REMOTEBACKUP_CLIENT_REMOTEBACKUP_H
+#define REMOTEBACKUP_CLIENT_REMOTEBACKUP_H
+
+void RemoteBackup();
+
+#endif //REMOTEBACKUP_CLIENT_REMOTEBACKUP_H

@@ -175,7 +175,7 @@ void getFilesystemStatusTest(){
     }
 }
 
-int main() {
+int testmain() {
     std::cout << "Menu options:" << std::endl;
 
     // Add new options as needed
