@@ -4,9 +4,17 @@ project(RemoteBackup_Client)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-pthread" )
 
-add_executable( RemoteBackup_Client testMain.cpp FileWatcher/FileWatcher.cpp
-        FileWatcher/FileWatcher.h ConnectionAPI/Connection.h ConnectionAPI/Connection.cpp ChecksumAPI/SHA256.cpp
-        ChecksumAPI/SHA256.h ChecksumAPI/Checksum.cpp ChecksumAPI/Checksum.h)
+add_executable( RemoteBackup_Client newMain.cpp
+        FileWatcher/FileWatcher.cpp
+        FileWatcher/FileWatcher.h
+        ConnectionAPI/Connection.h
+        ConnectionAPI/Connection.cpp
+        ChecksumAPI/SHA256.cpp
+        ChecksumAPI/SHA256.h
+        ChecksumAPI/Checksum.cpp
+        ChecksumAPI/Checksum.h
+        RemoteBackup/RemoteBackup.cpp
+        RemoteBackup/RemoteBackup.h)
 
 
 find_package(Boost REQUIRED COMPONENTS serialization filesystem)
