@@ -42,6 +42,8 @@ private:
 
     void handle_remove_file_error(const std::string &file_path);
 
+    void handle_get_file_error(const std::string &file_path);
+
     /******************* UTILITY METHODS ******************************************************************************/
 
     static void print_percentage(float percent);
@@ -63,6 +65,8 @@ private:
     void handle_send_file(const std::string& file_path, const std::string& command);
 
     void do_send_file(const std::shared_ptr<std::ifstream>& source_file);
+
+    void handle_get_file(const std::string &file_path);
 
 public:
 

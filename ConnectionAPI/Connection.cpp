@@ -17,12 +17,10 @@ Connection::Connection(std::string ip_address, int port_number, std::string base
     }
     catch(std::exception& e) {
         if(DEBUG) {
-            std::cout << "[ERROR] Entered in the catch" << std::endl;
-            std::cout << e.what() << std::endl;
+            std::cout << "[ERROR] Connection initialization error: " << e.what() << std::endl;
         }
         std::cout << "Could not initialize client, please try again." << std::endl;
         throw e;
-        //TODO check from the slides if I need to throw it
     }
 
 /******************* DESTRUCTOR ***************************************************************************************/
@@ -76,6 +74,21 @@ void Connection::handle_remove_file_error(const std::string &file_path){
             std::cout << "[ERROR] Open new connection error: " << e.what() << std::endl;
         }
         std::cout << "The server is still down, I can't remove the file right now." << std::endl;
+        close_connection(false);
+    }
+}
+
+void Connection::handle_get_file_error(const std::string &file_path){
+    try{ //for open_new_connection
+        close_connection(false);
+        open_new_connection();
+        get_file(file_path);
+    }
+    catch(std::exception &e){
+        if(DEBUG) {
+            std::cout << "[ERROR] Open new connection error: " << e.what() << std::endl;
+        }
+        std::cout << "The server is still down, I can't get the file right now." << std::endl;
         close_connection(false);
     }
 }
@@ -205,7 +218,7 @@ void Connection::remove_file(const std::string &file_path) {
         std::ostringstream oss;
         oss << "removeFile ";
         oss << cleaned_file_path;
-        oss << "\n";
+        //oss << "\n";
         send_string(oss.str());
 
         // Read the confirm of command receipt from the server
@@ -252,7 +265,7 @@ void Connection::add_file(const std::string &file_path) {
         if(DEBUG) {
             std::cout << "[ERROR] Add file error: " << e.what() << std::endl;
         }
-        std::cout << e.what() << " I'm trying to recover in 10 seconds." << std::endl;
+        std::cout << e.what() << "There was an error, I'm trying to recover in 10 seconds." << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(10));
         handle_add_file_error(file_path);
     }
@@ -273,16 +286,24 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     if(!source_file->is_open()) {
         std::cout << "[ERROR] Failed to open " << file_path << std::endl;
 
-        //TODO try to handle it throwing an exception and catching it outside, I probably need to define a custom exception (it may be a struct)
-
-        // Error handling
+        // Minor error handling
         std::string input;
         do {
             std::cout << "Do you want to try to open it again? (y/n)" << std::endl;
             std::getline(std::cin, input);
             if (input == "y"){
-                while(!source_file->is_open())
-                    source_file = std::make_shared<std::ifstream>(file_path, std::ios_base::binary | std::ios_base::ate);
+                for(int i = 0; i < 5; i++) {
+                    source_file = std::make_shared<std::ifstream>(file_path,
+                                                                  std::ios_base::binary | std::ios_base::ate);
+                    if(source_file->is_open())
+                        break;
+                }
+
+                if(!source_file->is_open()) {
+                    std::cout << "I tried to open it again but I couldn't, this file won't be included in the backup\";"
+                              << std::endl;
+                    return;
+                }
             }
             else if (input == "n") {
                 std::ostringstream oss;
@@ -323,7 +344,7 @@ void Connection::handle_send_file(const std::string &file_path, const std::strin
     std::cout << read_string() << std::endl;
 
     //std::cout << "\n" << "[INFO] File " << file_path << " sent successfully!" << std::endl;
-    std::cout << std::string("\n") << "[INFO] File " << file_path << " sent successfully!" << std::endl;
+    std::cout << "\n[INFO] File " << file_path << " sent successfully!" << std::endl;
 }
 
 void Connection::do_send_file(const std::shared_ptr<std::ifstream>& source_file) {
@@ -349,7 +370,7 @@ void Connection::do_send_file(const std::shared_ptr<std::ifstream>& source_file)
         int bytes_read_from_file = source_file->gcount(); //int is fine because i read at most buf's size, 1024 in this case
 
         // If uncommented the progress is printed in multiple lines succeded from this line
-        // Only use to debug file reading_ otherwise the progress gets unreadable
+        // Use only to debug file reading otherwise the progress gets unreadable
         /*if(DEBUG){
             std::cout << "[DEBUG] Bytes read from file: " << bytes_read_from_file << std::endl;
         }*/
@@ -373,7 +394,21 @@ void Connection::do_send_file(const std::shared_ptr<std::ifstream>& source_file)
     }
 }
 
-void Connection::get_file(const std::string &file_path) {
+void Connection::get_file(const std::string &file_path){
+    try{
+        handle_get_file(file_path);
+    }
+    catch (std::exception& e){
+        if(DEBUG) {
+            std::cout << "[ERROR] Save file error: " << e.what() << std::endl;
+        }
+        std::cout << "There was an error with the server, I'll try to retreive the file again in 10 seconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+        handle_get_file_error(file_path);
+    }
+}
+
+void Connection::handle_get_file(const std::string &file_path) {
     std::string cleaned_file_path = file_path.substr(base_path_.length(), file_path.length());
     std::string path_to_directory(file_path.substr(0, file_path.find_last_of('/')));
 
@@ -391,14 +426,24 @@ void Connection::get_file(const std::string &file_path) {
         //std::cout << "[ERROR] Failed to open " << file_path << std::endl;
         std::cout << "[ERROR] Failed to save " << file_path << std::endl;
 
-        // Error handling
+        // Minor error handling
         std::string input;
         do {
             std::cout << "Do you want to try to save it again? (y/n)" << std::endl;
             std::getline(std::cin, input);
             if (input == "y") {
-                while (!output_file->is_open())
+                for(int i = 0; i < 5; i++) {
                     output_file = std::make_shared<std::ofstream>(file_path, std::ios_base::binary);
+
+                    if(output_file->is_open())
+                        break;
+                }
+
+                if(!output_file->is_open()) {
+                    std::cout << "I tried to save it again but I couldn't, this file won't be retreived\";"
+                              << std::endl;
+                    return;
+                }
             }
             else if (input == "n") {
                 std::ostringstream oss2;
@@ -412,62 +457,50 @@ void Connection::get_file(const std::string &file_path) {
         } while (input != "y" && input != "n");
     }
 
-    // Probabilmente il try non serve
-    try {
-        boost::array<char, 1024> buf{};
-        boost::asio::streambuf request_buf;
+    boost::array<char, 1024> buf{};
+    boost::asio::streambuf request_buf;
 
-        // Send the command to request the file
-        std::ostringstream oss;
-        oss <<  "getFile ";
-        oss << cleaned_file_path;
-        send_string(oss.str());
+    // Send the command to request the file
+    std::ostringstream oss;
+    oss <<  "getFile ";
+    oss << cleaned_file_path;
+    send_string(oss.str());
 
-        // Receive file size
-        std::string response = read_string();
-        int pos = response.find(' ');
-        int file_size = std::stoi(response.substr(pos, response.length()));
+    // Receive file size
+    std::string response = read_string();
+    int pos = response.find(' ');
+    int file_size = std::stoi(response.substr(pos, response.length()));
 
-        // Send confirm to the server
-        send_string("[CLIENT_SUCCESS] File size received");
+    // Send confirm to the server
+    send_string("[CLIENT_SUCCESS] File size received");
 
-        if(DEBUG) {
-            std::ostringstream oss2;
-            oss2 << "[DEBUG] File size: ";
-            oss2 << file_size;
-            oss2 << " bytes";
-            std::cout << oss2.str() << std::endl;
-        }
-
-        for(;;) {
-            size_t len = main_socket_->read_some(boost::asio::buffer(buf));
-            if (len>0)
-                output_file->write(buf.c_array(), (std::streamsize)len);
-            if (output_file->tellp() == (std::fstream::pos_type)(std::streamsize)file_size)
-                break; // File was received
-        }
-
-        int bytes_received = output_file->tellp();
-
-        if(DEBUG) {
-            std::cout << "[DEBUG] Received " << bytes_received << " bytes." << std::endl;
-        }
-
-        if(bytes_received != file_size) {
-            std::cout << "[ERROR] File size and bytes receveid DOES NOT correspond!" << std::endl;
-            std::cout << "File size: " << file_size << std::endl;
-            std::cout << "Bytes received: " << bytes_received << std::endl;
-            throw std::runtime_error("File not received correctly");
-        }
+    if(DEBUG) {
+        std::ostringstream oss2;
+        oss2 << "[DEBUG] File size: ";
+        oss2 << file_size;
+        oss2 << " bytes";
+        std::cout << oss2.str() << std::endl;
     }
-    catch (std::exception& e){
-        if(DEBUG) {
-            std::cout << "[ERROR] Save file error: " << e.what() << std::endl;
-        }
-        std::cout << "There was an error with the server, I'll try to retreive the file again in 10 seconds" << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(10));
-        open_new_connection();
-        get_file(file_path);
+
+    for(;;) {
+        size_t len = main_socket_->read_some(boost::asio::buffer(buf));
+        if (len>0)
+            output_file->write(buf.c_array(), (std::streamsize)len);
+        if (output_file->tellp() == (std::fstream::pos_type)(std::streamsize)file_size)
+            break; // File was received
+    }
+
+    int bytes_received = output_file->tellp();
+
+    if(DEBUG) {
+        std::cout << "[DEBUG] Received " << bytes_received << " bytes." << std::endl;
+    }
+
+    if(bytes_received != file_size) {
+        std::cout << "[ERROR] File size and bytes received DOES NOT correspond!" << std::endl;
+        std::cout << "File size: " << file_size << std::endl;
+        std::cout << "Bytes received: " << bytes_received << std::endl;
+        throw std::runtime_error("File not received correctly");
     }
 }
 
